@@ -1,0 +1,20 @@
+EJERCICIO 2 - API de la cafetería (Node.js)   [Nivel: fácil]
+==============================================================
+
+La carpeta contiene una API REST hecha con Node.js y Express que
+publica el menú de la cafetería. Las dependencias están en
+package.json.
+
+Tareas:
+1. Escribe un Dockerfile que instale las dependencias, empaquete la
+   aplicación y la ejecute al arrancar el contenedor.
+2. Revisa el código (sin ejecutarlo) y responde:
+   - ¿En qué puerto escucha la aplicación?
+   - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+   - ¿Es obligatoria? ¿Qué pasa si no se define?
+3. Ejecuta el contenedor publicando el puerto y verifica en el
+   navegador las rutas:  /   /menu   /menu/bebidas
+4. Ejecuta dos contenedores al mismo tiempo, cada uno para una sede
+   diferente y en un puerto diferente de tu equipo.
+
+Entrega: el Dockerfile y los comandos build/run que utilizaste.

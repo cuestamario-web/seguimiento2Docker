@@ -1,0 +1,35 @@
+EJERCICIO 5 - Un proyecto, varias configuraciones de librerías   [Nivel: medio]
+==============================================================
+
+La carpeta contiene UN proyecto en Python (carpeta app/) para
+promocionar un evento. Según el "perfil" con el que se empaquete, el
+programa hace cosas distintas y necesita librerías distintas:
+
+  perfiles/agenda/        -> muestra la agenda del evento en una tabla
+  perfiles/banner/        -> muestra el nombre del evento en letras grandes
+  perfiles/inscripcion/   -> muestra un código QR para inscribirse
+
+Cada carpeta de perfiles/ tiene SU PROPIO requirements.txt.
+
+La idea es que cada imagen lleve SOLO las librerías del perfil que
+necesita, no las de todos.
+
+Tareas:
+1. Escribe un Dockerfile, partiendo de python:3.12-alpine, que reciba
+   un argumento de construcción llamado PERFIL y:
+   - instale únicamente las librerías del requirements.txt de ese
+     perfil
+   - si el perfil no existe (no hay carpeta con ese nombre), la
+     construcción debe fallar con un mensaje claro
+   - copie el código de app/ y lo ejecute al arrancar
+2. Revisa el código de app/ (sin ejecutarlo):
+   - ¿Cómo sabe main.py qué perfil ejecutar? ¿Qué debes hacer en el
+     Dockerfile para que lo sepa?
+   - ¿Qué otras variables de entorno usa el proyecto? ¿Cuáles son
+     opcionales y qué perfil usa cada una?
+3. Construye una imagen por cada perfil y compara sus tamaños.
+4. Ejecuta la imagen del perfil agenda cambiando PERFIL a banner con
+   -e. ¿Qué pasa y por qué?
+
+Entrega: el Dockerfile, los comandos build/run que utilizaste y la
+respuesta de las preguntas.

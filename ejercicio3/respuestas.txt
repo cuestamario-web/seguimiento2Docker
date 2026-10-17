@@ -1,0 +1,23 @@
+EJERCICIO 3 - Inventario de bodega (Java)
+=========================================
+
+INSTRUCCIONES
+----------------------------------------------------
+docker build -t inventario-bodega .
+
+# Sede principal (valor por defecto)
+docker run --rm inventario-bodega
+
+# Sede norte, sin reconstruir la imagen
+docker run --rm -e ARCHIVO_INVENTARIO=datos/inventario_sede_norte.txt inventario-bodega
+
+RESPUESTAS
+----------
+- Archivos además del código: la carpeta datos/ (inventario.txt e
+  inventario_sede_norte.txt). La app los lee en tiempo de ejecución con una ruta
+  relativa, por eso el Dockerfile hace COPY datos ./datos.
+- Variable de entorno: ARCHIVO_INVENTARIO (LectorInventario.java).
+- ¿Obligatoria? No. Si no se define usa "datos/inventario.txt".
+- ¿Para qué sirve? Para indicar qué archivo de inventario leer (p. ej. el de la
+  sede norte) sin tocar el código ni reconstruir la imagen. Si la ruta no existe,
+  la app imprime "No fue posible leer el inventario" y sale con error.

@@ -1,0 +1,33 @@
+EJERCICIO 4 - Conversor de monedas en dos lenguajes
+===================================================
+
+INSTRUCCIONES
+----------------------------------------------------------------------------
+docker build --build-arg LENGUAJE=java   -t conversor:java .
+docker build --build-arg LENGUAJE=python -t conversor:python .
+
+# Cada imagen con al menos dos monedas, sin reconstruir
+docker run --rm conversor:java
+docker run --rm -e MONEDA_DESTINO=EUR conversor:java
+docker run --rm -e MONEDA_DESTINO=MXN conversor:java
+
+docker run --rm conversor:python
+docker run --rm -e MONEDA_DESTINO=EUR conversor:python
+docker run --rm -e MONEDA_DESTINO=MXN conversor:python
+
+# Valor inválido en la construcción (debe fallar con mensaje claro)
+docker build --build-arg LENGUAJE=ruby -t conversor:ruby .
+#  -> ERROR: LENGUAJE='ruby' no es válido. Use --build-arg LENGUAJE=java o LENGUAJE=python
+
+# Moneda no soportada en ejecución
+docker run --rm -e MONEDA_DESTINO=JPY conversor:java
+#  -> Moneda no soportada: JPY. Use USD, EUR o MXN.
+
+RESPUESTAS
+----------
+- Variable de entorno: MONEDA_DESTINO (en Main.java y en app.py).
+- Valores aceptados: USD, EUR o MXN. Cualquier otro imprime "Moneda no
+  soportada" y termina con código 1.
+- Por defecto: USD (ENV MONEDA_DESTINO=USD en el Dockerfile).
+- LENGUAJE se declara como ARG (solo existe al construir) y se copia a ENV para
+  que el CMD sepa qué programa ejecutar al arrancar.

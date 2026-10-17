@@ -1,0 +1,50 @@
+EJERCICIO 5 - Un proyecto, varias configuraciones de librerías
+==============================================================
+
+INSTRUCCIONES
+----------------------------------------------------
+docker build --build-arg PERFIL=agenda      -t evento:agenda .
+docker build --build-arg PERFIL=banner      -t evento:banner .
+docker build --build-arg PERFIL=inscripcion -t evento:inscripcion .
+
+# Comparar tamaños
+docker images evento
+
+# Ejecutar cada perfil
+docker run --rm evento:agenda
+docker run --rm evento:banner
+docker run --rm evento:inscripcion
+docker run --rm -e URL_INSCRIPCION=https://eam.edu.co/evento evento:inscripcion
+docker run --rm -e EVENTO_NOMBRE="Feria de Software" evento:banner
+
+# Perfil inexistente (debe fallar con mensaje claro)
+docker build --build-arg PERFIL=otro -t evento:otro .
+#  -> ERROR: el perfil 'otro' no existe. Use --build-arg PERFIL=agenda | banner | inscripcion
+
+# Punto 4: imagen agenda cambiando PERFIL a banner
+docker run --rm -e PERFIL=banner evento:agenda
+
+NOTA: el Dockerfile usa RUN --mount=type=bind (BuildKit), activo por defecto en
+Docker Desktop reciente.
+
+RESPUESTAS
+----------
+- ¿Cómo sabe main.py qué perfil ejecutar? Lee la variable de entorno PERFIL
+  (os.getenv("PERFIL")). En el Dockerfile hay que pasar el ARG PERFIL a una
+  variable de entorno: ENV PERFIL=${PERFIL}, porque un ARG no existe cuando el
+  contenedor está corriendo.
+- Otras variables:
+  * EVENTO_NOMBRE: opcional, todos los perfiles; por defecto "Semana de la
+    Ingenieria".
+  * URL_INSCRIPCION: opcional, solo el perfil inscripcion; por defecto
+    "https://eam.edu.co".
+  * PERFIL es la única obligatoria: sin ella main.py dice que no sabe qué perfil
+    ejecutar y sale con error.
+- Tamaños (punto 3): la imagen de cada perfil solo trae sus librerías, así que
+  difieren entre sí; completar con la salida real de "docker images evento".
+- Punto 4: al correr la imagen agenda con -e PERFIL=banner, main.py intenta cargar
+  salidas.banner, pero pyfiglet y colorama no están instaladas en esa imagen y
+  muestra: "El perfil 'banner' necesita la librería 'pyfiglet', pero no está
+  instalada en esta imagen." y termina con error. Las librerías se instalan en
+  tiempo de construcción; -e solo cambia una variable en ejecución, no instala
+  nada. Para banner hay que construir la imagen con --build-arg PERFIL=banner.

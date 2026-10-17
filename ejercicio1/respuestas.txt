@@ -1,0 +1,20 @@
+EJERCICIO 1 - Reporte de notas (Python)
+=======================================
+
+INSTRUCCIONES
+----------------------------------------------------
+docker build -t reporte-notas .
+docker run --rm reporte-notas
+
+Cambiar la nota de aprobación sin reconstruir:
+docker run --rm -e NOTA_APROBACION=3.5 reporte-notas
+
+RESPUESTAS
+----------
+- ¿Usa variable de entorno? Sí: NOTA_APROBACION (evaluacion.py, os.getenv).
+- ¿Es obligatoria? No. Si no se define, se usa el valor por defecto "3.0".
+- ¿Qué cambia si se modifica? Es la nota mínima para aprobar. Con 3.0 aprueban
+  5 de 7 estudiantes; con 3.5 aprueban solo 2 de 7 (cambia la columna Estado y
+  el conteo final de Aprobados). Las definitivas no cambian.
+- En el Dockerfile se declaró con ENV NOTA_APROBACION=3.0 y el -e del docker run
+  lo sobrescribe en tiempo de ejecución, sin reconstruir la imagen.

@@ -1,0 +1,37 @@
+EJERCICIO 2 - API de la cafetería (Node.js)
+===========================================
+
+INSTRUCCIONES
+----------------------------------------------------
+docker build -t api-cafeteria .
+
+# Una sede (puerto 3001 de mi equipo -> 3000 del contenedor)
+docker run -d --name cafeteria-centro -e SEDE_CAFETERIA=Centro -p 3001:3000 api-cafeteria
+
+# Verificar en el navegador:
+#   http://localhost:3001/
+#   http://localhost:3001/menu
+#   http://localhost:3001/menu/bebidas
+
+# Segunda sede al mismo tiempo, en otro puerto del equipo
+docker run -d --name cafeteria-norte -e SEDE_CAFETERIA=Norte -p 3002:3000 api-cafeteria
+# http://localhost:3002/   -> "Bienvenido a la cafetería Norte"
+
+docker ps
+docker stop cafeteria-centro cafeteria-norte
+docker rm cafeteria-centro cafeteria-norte
+
+Sin la variable (para comprobar que es obligatoria):
+docker run --rm api-cafeteria
+
+RESPUESTAS
+----------
+- Puerto: 3000 dentro del contenedor (fijo en src/config.js). Por eso se publica
+  con -p <puerto_equipo>:3000.
+- Variable de entorno: SEDE_CAFETERIA.
+- ¿Obligatoria? Sí. Si no se define, la app imprime "Error: configuración
+  incompleta, la aplicación no puede iniciar." y termina con process.exit(1);
+  el contenedor se detiene de inmediato.
+- Por eso en el Dockerfile NO se le puso valor por defecto.
+- Dos contenedores a la vez: cada uno con su -e SEDE_CAFETERIA y un puerto
+  distinto del equipo (3001 y 3002); ambos usan el 3000 internamente sin chocar.

@@ -1,0 +1,18 @@
+docker build -t menu . 
+
+la aplicacion siempre escucha en el puerto 3000 (src/config.js)
+
+La variable de entorno que usa se llama SEDE_CAFETERIA, y es obligatoria para que no lanze error en consola (src/config.js)
+
+Para el primer contenedor use docker run -d -p 3010:3000 menu 
+NO ingrese el parametron -e porque ya tengo por predeterminado en el Dockerfile que inicie con "ARMENIA"
+la aplicacion se esta ejecutando en mi puerto 3010 de mi equipo y en el puerto 3000 del contenedor
+
+Para el segundo contenedor modifique la variable de entorno "SEDE_CAFETERIA" con docker run -d -p 3020:3000 -e SEDE_CAFETERIA=cafe_Quindio menu
+
+para ingresar a el menu desde el navegador se uso http://localhost:3020/menu/bebidas
+
+
+
+
+

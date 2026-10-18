@@ -1,0 +1,8 @@
+docker build -t reporte-notas .
+docker run reporte-notas
+
+SI tiene variable de entorno, para editar la variable de entorno "NOTA_APROBACION" se uso:
+
+docker run -e NOTA_APROBACION=2.5 reporte-notas
+
+NO era obligatorio definirla en el Docker file ya que venia por "3.0" como valor por defecto, en mi caso al modificarla a "2.5" pasaron los 7 estudiantes y no solo 5 como era originalmente con la nota de aprobacion.

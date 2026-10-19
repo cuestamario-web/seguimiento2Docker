@@ -1,0 +1,17 @@
+¿Cómo sabe main.py qué perfil ejecutar? ¿Qué debes hacer en el
+     Dockerfile para que lo sepa?
+   - ¿Qué otras variables de entorno usa el proyecto? ¿Cuáles son
+     opcionales y qué perfil usa cada una?
+3. Construye una imagen por cada perfil y compara sus tamaños.
+4. Ejecuta la imagen del perfil agenda cambiando PERFIL a banner con
+   -e. ¿Qué pasa y por qué?
+
+EL main.py sabe que perfil ejecutar porque desde el contenedor estamos copiando y ejecutando el requirements.txt del tipo de perfil que entro como parametron
+Tambien esta EVENTO-NOMBRE como ENV la cual viene con un valor predeterminado y la utiliza cualquier perfil
+
+--build-arg PERFIL=agenda muestra una tabla con posibles eventos
+--build-arg PERFIL=banner muestra el nombre del evento gigante
+--build-arg PERFIL=inscripcion lanza un QR
+
+Al cambiar ENV PERFIL=agenda a PERFIL=banner lanza un error ya programado, esto pasa porque la imagen solo tendra el requirements.txt de agenda, aunque el porgrama tenga como PERFIL=banner
+la libreria se instalara de acuerdo al ARG

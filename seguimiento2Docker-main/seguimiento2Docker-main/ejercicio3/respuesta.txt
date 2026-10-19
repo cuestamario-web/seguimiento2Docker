@@ -1,0 +1,14 @@
+1.¿Qué archivos además del código necesita la aplicación dentro del contenedor?
+Rta:Necesita los archivos de texto con los datos de inventario ubicados en la carpeta datos/ 
+como inventario.txt o inventario_sede_norte.txt, ya que el programa los lee para procesar los productos.
+
+2.¿La aplicacion usa alguna variable de entorno? ¿Como se llama?
+Rta:Si utiliza una variable de entorno que se llama ARCHIVO_INVENTARIO.
+
+¿Es obligatoria? ¿Para qué sirve?
+Rta:No es obligatoria porque sirve para especificar la ruta del archivo de inventario que 
+la aplicacion debe leer si no se define, toma por defecto "datos/inventario.txt".
+
+COMANDOS:
+docker build -t ejercicio3 .
+docker run --rm -e ARCHIVO_INVENTARIO="datos/inventario_sede_norte.txt" ejercicio3

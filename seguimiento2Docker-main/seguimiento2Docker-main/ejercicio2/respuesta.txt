@@ -1,0 +1,15 @@
+1.¿En qué puerto escucha la aplicación?
+Rta:Escucha en el puerto 3000 esta en config.js.
+
+2.¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+Rta:Si utiliza la variable de entorno SEDE_CAFETERIA esta como process.env.SEDE_CAFETERIA.
+
+3.¿Es obligatoria? ¿Qué pasa si no se define?
+
+Rta:Si es obligatoria porque el codigo valida si no existe, imprime un 
+error por consola y detiene la ejecución inmediatamente process.exit(1).
+
+COMANDOS:
+docker build -t ejercicio2 .
+docker run --rm -d -p 3000:3000 -e SEDE_CAFETERIA="Norte" --name cafe-norte ejercicio2
+docker run --rm -d -p 3002:3000 -e SEDE_CAFETERIA="Sur" --name cafe-sur ejercicio2

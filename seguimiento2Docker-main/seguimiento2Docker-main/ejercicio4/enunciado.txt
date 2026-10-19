@@ -1,0 +1,33 @@
+EJERCICIO 4 - Conversor de monedas en dos lenguajes   [Nivel: medio]
+==============================================================
+
+La carpeta contiene el MISMO programa (un conversor de pesos
+colombianos a otras monedas) escrito en dos lenguajes:
+
+  java/     clases Java en src/ (se compilan con javac, sin Maven)
+  python/   app.py + requirements.txt (usa una librería externa)
+
+Tareas:
+1. Escribe UN SOLO Dockerfile, partiendo de la imagen alpine:3.20,
+   que reciba un argumento de construcción llamado LENGUAJE
+   (valores: java | python) y según su valor:
+   - instale lo necesario para ese lenguaje
+     (Java: paquete openjdk21-jdk   /   Python: paquete python3)
+   - copie únicamente la carpeta del proyecto elegido
+   - prepare el proyecto (compilar en Java / instalar dependencias
+     en Python)
+   - ejecute el programa correcto al arrancar el contenedor
+2. Si se recibe un valor distinto de java o python, la construcción
+   debe fallar con un mensaje claro.
+3. Revisa el código de ambos proyectos: ¿qué variable de entorno
+   usan? ¿Qué valores acepta? Defínela en el Dockerfile con un valor
+   por defecto.
+4. Construye las dos imágenes y ejecuta cada una con al menos dos
+   monedas diferentes sin reconstruir.
+
+Pistas:
+- En Alpine, el JDK queda en /usr/lib/jvm/default-jvm/bin
+- En Alpine, pip no deja instalar paquetes en el sistema: usa un
+  entorno virtual (python3 -m venv)
+
+Entrega: el Dockerfile y los comandos build/run que utilizaste.

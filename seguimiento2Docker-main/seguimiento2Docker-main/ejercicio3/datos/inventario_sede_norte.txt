@@ -1,0 +1,5 @@
+# nombre;cantidad;precio_unitario
+Portatil 14 pulgadas;6;2800000
+Cargador universal;30;65000
+Base refrigerante;9;55000
+Webcam HD;18;120000

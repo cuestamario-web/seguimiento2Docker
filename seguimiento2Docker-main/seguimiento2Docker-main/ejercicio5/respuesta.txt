@@ -1,0 +1,25 @@
+
+¿Cómo sabe main.py qué perfil ejecutar? ¿Qué debes hacer en el
+Dockerfile para que lo sepa?
+
+Rta:main.py lee la variable de entorno PERFIL usando os.getenv("PERFIL").
+En el Dockerfile hay que definir esta variable de entorno usando la instruccion ENV PERFIL=$PERFIL_ARG 
+o pasandola como argumento de construccion en tiempo de build para que el script pueda detectarla al arrancar.
+
+2.¿Qué otras variables de entorno usa el proyecto? ¿Cuáles son opcionales y qué perfil usa cada una?
+
+Rta:EVENTO_NOMBRE:Se utiliza de forma general en main.py con un valor por defecto de "Semana de la Ingenieria" es opcional.
+URL_INSCRIPCION: Se utiliza exclusivamente en el perfil de inscripcion
+dentro del archivo inscripcion.py con un valor por defecto de "https://eam.edu.co" es opcional.
+
+3.Ejecuta la imagen del perfil agenda cambiando PERFIL a banner con
+-e. ¿Qué pasa y por qué?
+
+Rta:La ejecucion falla y arroja un error indicando que la libreria necesaria no esta instalada en la imagen esto paso porque 
+la imagen evento-agenda se construyo unicamente con las dependencias del perfil agenda como tabulate.
+
+COMANDOS:
+docker build --build-arg PERFIL=agenda -t ejercicio5-agenda .
+docker build --build-arg PERFIL=banner -t ejercicio5-banner .
+docker build --build-arg PERFIL=inscripcion -t ejercicio5-inscripcion .
+docker run --rm -e PERFIL=banner ejercicio5-agenda

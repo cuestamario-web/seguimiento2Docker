@@ -1,0 +1,22 @@
+EJERCICIO 3 - Inventario de bodega (Java)   [Nivel: fácil]
+==============================================================
+
+La carpeta contiene una aplicación de consola en Java (sin Maven,
+solo clases en src/) que lee un inventario y muestra el valor total
+y los productos que hay que reponer.
+
+Tareas:
+1. Escribe un Dockerfile que compile la aplicación con javac y la
+   ejecute al arrancar el contenedor.
+   Pista: usa una imagen que traiga el JDK, por ejemplo
+   eclipse-temurin:21-jdk-alpine
+2. Revisa el código (sin ejecutarlo) y responde:
+   - ¿Qué archivos además del código necesita la aplicación dentro
+     del contenedor?
+   - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+   - ¿Es obligatoria? ¿Para qué sirve?
+3. Usando la variable de entorno (si existe), ejecuta el contenedor
+   para que muestre el inventario de la sede norte, sin reconstruir
+   la imagen.
+
+Entrega: el Dockerfile y los comandos build/run que utilizaste.

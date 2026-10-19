@@ -1,0 +1,17 @@
+1.¿Qué variable de entorno usan los programas?
+Rta:Ambos programas tanto en Java como en Python utilizan la variable de entorno MONEDA_DESTINO.
+
+2.¿Qué valores acepta?
+Rta:Acepta USD, EUR y MXN si se le pasa cualquier otro valor el programa se detiene y 
+muestra un mensaje de error indicando las monedas validas.
+
+3.¿Cuál es su valor por defecto?
+Rta:Por defecto toma el valor USD si la variable no es definida.
+
+COMANDOS:
+docker build --build-arg LENGUAJE=java -t ejercicio4-java .
+docker build --build-arg LENGUAJE=python -t ejercicio4-python .
+docker run --rm -e MONEDA_DESTINO=USD ejercicio4-java
+docker run --rm -e MONEDA_DESTINO=EUR ejercicio4-java
+docker run --rm -e MONEDA_DESTINO=EUR ejercicio4-python
+docker run --rm -e MONEDA_DESTINO=MXN ejercicio4-python

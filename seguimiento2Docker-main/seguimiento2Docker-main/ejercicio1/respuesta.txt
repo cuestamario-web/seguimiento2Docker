@@ -1,0 +1,22 @@
+1.¿La aplicacion usa alguna variable de entorno? ¿como se llama?
+
+rta: Si la aplicacion utiliza una variable de entorno definida en evaluacion.py 
+la cual es os.getenv("NOTA_APROBACION", "3.0") Se llama NOTA_APROBACION.
+
+2.¿Es obligatoria? 
+
+rta: No es obligatoria si no se define en el entorno del sistema,la funcion utilizara
+automaticamente el valor por defecto configurado en el codigo "3.0".
+
+3.¿Que cambia en el resultado si se modifica su valor?
+
+Rta: Si se modifica su valor a 3.6 el umbral para aprobar cambia. Los estudiantes cuya nota definitiva 
+sea menor a ese nuevo valor pasaran de tener el estado "APROBADO" a "REPROBADO" reduciendose el numero 
+total de aprobados en el reporte final.
+
+
+COMANDOS
+
+docker build -t ejercicio1 .
+docker run --rm ejercicio1
+docker run --rm -e NOTA_APROBACION=3.6 ejercicio1

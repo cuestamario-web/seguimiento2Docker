@@ -1,0 +1,20 @@
+EJERCICIO 1 - Reporte de notas (Python)   [Nivel: fácil]
+==============================================================
+
+La carpeta contiene una aplicación de consola en Python que lee el
+archivo notas.csv y muestra un reporte con la nota definitiva de cada
+estudiante y si aprobó o reprobó.
+
+La aplicación NO usa librerías externas (solo la librería estándar).
+
+Tareas:
+1. Escribe un Dockerfile que empaquete la aplicación y la ejecute
+   al arrancar el contenedor.
+2. Revisa el código (sin ejecutarlo) y responde:
+   - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+   - ¿Es obligatoria? ¿Qué pasa si no se define?
+   - ¿Qué cambia en el resultado si se modifica su valor?
+3. Si existe, declárala en el Dockerfile con un valor por defecto y
+   demuestra con docker run que se puede cambiar sin reconstruir.
+
+Entrega: el Dockerfile y los comandos build/run que utilizaste.

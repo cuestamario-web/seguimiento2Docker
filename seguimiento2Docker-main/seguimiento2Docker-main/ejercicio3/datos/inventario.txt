@@ -1,0 +1,7 @@
+# nombre;cantidad;precio_unitario
+Teclado USB;25;45000
+Mouse inalambrico;8;38000
+Monitor 24 pulgadas;12;720000
+Cable HDMI;40;15000
+Memoria USB 64GB;5;32000
+Diadema con microfono;15;85000

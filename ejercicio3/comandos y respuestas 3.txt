@@ -1,0 +1,12 @@
+
+
+Ademas del codigo necesita los archivos.txt de la carpeta datos/ para mostrar los dos posibles inventarios, en consola
+
+La aplicacion usa una variable de entorno llamada ARCHIVO_INVENTARIO, la cual no es obligatoria declarar en el Dockerfile pues accede a un archivo por defecto (inventario.txt), sin este archivo nos mostraria algo como "No fue posible leer el inventario: + ruta de donde toma el archivo" 
+
+Se construye la imagen con: 
+docker build -t inventario-bodega .
+Se corre el contenedor con: 
+docker run inventario-bodega 
+y para editar su ENV por defecto:
+docker run -e ARCHIVO_INVENTARIO=datos/inventario_sede_norte.txt inventario-bodega 

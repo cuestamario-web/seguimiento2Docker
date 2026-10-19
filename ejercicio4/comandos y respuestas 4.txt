@@ -1,0 +1,15 @@
+Usa la variable de entorno MONEDA_DESTINO, los valores que acepta son USD, EUR y MXN 
+si se ingresa un valor diferente a los anteriores fallara con un mensaje "Moneda no soportada"
+Se definio por defecto en el Dockerfile con EUR
+
+Como se definio java como lenguaje predeterminado se contruye con:
+docker build -t conversor-moneda .
+Para utilizar python como lenguaje:
+docker build --build-arg LENGUAJE=python conversor-moneda-python .
+
+Para correr y modificar variable de entorno ("MONEDA_DESTINO"):
+docker run conversor-moneda
+docker run conversor-moneda-python
+docker run -e MONEDA_DESTINO=USD conversor-moneda
+docker run -e MONEDA_DESTINO=MXN conversor-moneda-python
+docker run -e MONEDA_DESTINO=LB conversor-moneda ---> Lanza error

@@ -10,8 +10,11 @@ Tareas:
    aplicación y la ejecute al arrancar el contenedor.
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿En qué puerto escucha la aplicación?
+    R/ Se escucha en el 3000 y esta  fijo.
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+    R/ Si usa SEDE_CAFETERIA
    - ¿Es obligatoria? ¿Qué pasa si no se define?
+   Sí. Si no se define, lanza un error así que la app no arranca y el contenedor se detiene de inmediato.
 3. Ejecuta el contenedor publicando el puerto y verifica en el
    navegador las rutas:  /   /menu   /menu/bebidas
 4. Ejecuta dos contenedores al mismo tiempo, cada uno para una sede

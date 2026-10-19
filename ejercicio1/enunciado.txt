@@ -12,8 +12,11 @@ Tareas:
    al arrancar el contenedor.
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+    R/ Si, tenemos "NOTA_APROBACION".
    - ¿Es obligatoria? ¿Qué pasa si no se define?
+    R/ No, porque tiene valor por defecto.
    - ¿Qué cambia en el resultado si se modifica su valor?
+    R/El umbral de aprobación, el cual afectaria el estado de cada estudiante y el conteo final
 3. Si existe, declárala en el Dockerfile con un valor por defecto y
    demuestra con docker run que se puede cambiar sin reconstruir.
 

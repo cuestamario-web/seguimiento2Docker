@@ -1,0 +1,61 @@
+¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+R/ Usa una variable de entorno llamada NOTA_APROBACION y se lee en evaluacion.py
+
+¿Es Obligatoria? ¿Que pasa si no se define?
+R/ No es obligatoria. como se usa o.getenv con un segundo argumento, si la variable no se define la aplicación toma el valor por defecto 3.0 y funciona con normalidad.
+
+¿Que cambia en el resultado si se modifica su valor?
+R/ Cambia la nota minima para aprobar, las notas definitivas no cambian, solo el estado
+(Aprobado o reprobado) por lo que si aumentamos el valor hay menos aprobados y viceversa.
+
+Si existe, declárala en el Dockerfile con un valor por defecto y
+   demuestra con docker run que se puede cambiar sin reconstruir.
+
+La variable está declarada en el Dockerfile con ENV NOTA_APROBACION=3.0.
+
+# Construir la imagen
+docker build -t reporte-notas .
+
+# Ejecutar con el valor por defecto (3.0)
+docker run --rm reporte-notas
+
+# Ejecutar cambiando la variable sin reconstruir la imagen
+docker run --rm -e NOTA_APROBACION=3.5 reporte-notas
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio1> docker run --rm reporte-notas
+====================================================
+        REPORTE DE NOTAS - PROGRAMACION III
+====================================================
+Estudiante              Definitiva          Estado
+----------------------------------------------------
+Laura Gomez                   4.20        APROBADO
+Andres Rios                   2.89       REPROBADO
+Valentina Diaz                3.11        APROBADO
+Juan Pablo Mejia              4.82        APROBADO
+Camila Ortiz                  2.90       REPROBADO
+Santiago Herrera              3.33        APROBADO
+Mariana Lopez                 3.24        APROBADO
+----------------------------------------------------
+Aprobados: 5 de 7
+====================================================
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio1> docker run --rm -e NOTA_APROBACION=3.5 reporte-notas
+====================================================
+        REPORTE DE NOTAS - PROGRAMACION III
+====================================================
+Estudiante              Definitiva          Estado
+----------------------------------------------------
+Laura Gomez                   4.20        APROBADO
+Andres Rios                   2.89       REPROBADO
+Valentina Diaz                3.11       REPROBADO
+Juan Pablo Mejia              4.82        APROBADO
+Camila Ortiz                  2.90       REPROBADO
+Santiago Herrera              3.33       REPROBADO
+Mariana Lopez                 3.24       REPROBADO
+----------------------------------------------------
+Aprobados: 2 de 7
+====================================================
+
+
+
+

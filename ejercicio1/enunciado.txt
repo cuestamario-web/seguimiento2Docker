@@ -12,9 +12,25 @@ Tareas:
    al arrancar el contenedor.
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+  - si, se llama "NOTA_APROBACION"
    - ¿Es obligatoria? ¿Qué pasa si no se define?
+   -No, si no se define, la aplicación usará un valor por defecto de 3.0
    - ¿Qué cambia en el resultado si se modifica su valor?
+   -Cambia el criterio para aprobar o reprobar
 3. Si existe, declárala en el Dockerfile con un valor por defecto y
    demuestra con docker run que se puede cambiar sin reconstruir.
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+FROM python:3.11-alpine
+WORKDIR /app
+COPY . .
+ENV NOTA_APROBACION=3.0
+CMD ["python", "app.py"]
+
+ Comados utilizados
+  docker build -t nota-stu .
+docker run --name notas nota-stu
+
+modficando la variable de entorno de 3.0 a 4.0
+docker run -e NOTA_APROBACION=4.0 nota-stu

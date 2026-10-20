@@ -10,13 +10,36 @@ Tareas:
    ejecute al arrancar el contenedor.
    Pista: usa una imagen que traiga el JDK, por ejemplo
    eclipse-temurin:21-jdk-alpine
+
+   FROM eclipse-temurin:21-jdk-alpine
+   WORKDIR /app
+   COPY src/ ./src/
+   COPY datos/ ./datos/
+   RUN find src -name "*.java" | xargs javac
+   ENV ARCHIVO_INVENTARIO="datos/inventario.txt"
+   CMD ["java", "-cp", "src", "bodega.Main"]
+
+ docker build -t invetario-app .
+  docker run --rm invetario-app
+
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿Qué archivos además del código necesita la aplicación dentro
      del contenedor?
+    Necesita datos/inventario.txt y datos/inventario_sede_norte.txt
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+   Si, se llama ARCHIVO_INVENTARIO
    - ¿Es obligatoria? ¿Para qué sirve?
+   No, porque si la variable no esta definida se usa datos/inventario.txt
+  sirve para indicar el archivo de inventario que debe leer la aplicación.
 3. Usando la variable de entorno (si existe), ejecuta el contenedor
    para que muestre el inventario de la sede norte, sin reconstruir
    la imagen.
 
+
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+docker build -t invetario-app .
+
+docker run --rm invetario-app
+
+ docker run -e ARCHIVO_INVENTARIO=datos/inventario_sede_norte.txt invetario-app

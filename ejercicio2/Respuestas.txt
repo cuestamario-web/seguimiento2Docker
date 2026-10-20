@@ -1,0 +1,62 @@
+¿En qué puerto escucha la aplicación?
+R/
+En el puerto 3000. Está escrito directamente en config.js
+
+¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+R/
+SEDE_CAFETERIA se lee en el config.js
+"const sede = process.env.SEDE_CAFETERIA;"
+
+¿Es obligatoria? ¿Qué pasa si no se define?
+R/ es obligatoria porque si no se define devuelve un mensaje de error,
+el contenedor arranca y se detiene de inmediato
+
+3
+R/
+docker build -t api-cafeteria .
+
+docker run -d --name cafeteria-centro -p 3000:3000 -e SEDE_CAFETERIA=Centro api-cafeteria
+}
+publica el puerto 3000 del contenedor en el puerto 3000 de tu equipo. Rutas verificadas en el navegador:
+
+http://localhost:3000/	Mensaje de bienvenida con la sede y la lista de rutas
+http://localhost:3000/menu	El menú completo
+http://localhost:3000/menu/bebidas	Solo los productos de la categoría bebidas
+
+##Para demostrar que la variable es obligatoria:
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio2> docker run --rm api-cafeteria
+
+> api-cafeteria@1.0.0 start
+> node src/server.js
+
+Error: configuración incompleta, la aplicación no puede iniciar.
+
+What's next:
+    Debug this container error with Gordon → docker ai "help me fix this container error"
+
+4 DOS CONTENEDORES AL MISMO TIEMPO
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio2> docker ps
+CONTAINER ID   IMAGE           COMMAND                  CREATED          STATUS          PORTS                                         NAMES
+29a0d36f30ae   api-cafeteria   "docker-entrypoint.s…"   40 seconds ago   Up 39 seconds   0.0.0.0:3002->3000/tcp, [::]:3002->3000/tcp   cafeteria-norte
+3311adf42bac   api-cafeteria   "docker-entrypoint.s…"   7 minutes ago    Up 7 minutes    0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp   cafeteria-centro
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio2> docker rm -f cafeteria-centro cafeteria-norte
+cafeteria-centro
+cafeteria-norte
+
+
+COMANDOS UTILIZADOS
+Build (se ejecuta una sola vez, desde la carpeta ejercicio2):
+docker build -t api-cafeteria .
+docker run -d --name cafeteria-centro -p 3000:3000 -e SEDE_CAFETERIA=Centro api-cafeteria
+docker run --rm api-cafeteria (DEMOSTRANDO QUE LA VARIABLE ES OBLIGATORIA)
+DOS SEDES AL MISMO TIEMPO
+docker rm -f cafeteria-centro
+
+docker run -d --name cafeteria-centro -p 3001:3000 -e SEDE_CAFETERIA=Centro api-cafeteria
+
+docker run -d --name cafeteria-norte -p 3002:3000 -e SEDE_CAFETERIA=Norte api-cafeteria
+
+docker ps
+
+

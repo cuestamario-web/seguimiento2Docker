@@ -1,0 +1,85 @@
+2.LENGUAJE INVALIDO (ruby)
+R/ docker build --build-arg LENGUAJE=ruby -t conversor-ruby .
+ => ERROR [4/5] COPY ruby/ ./                                       0.0s
+------
+ > [4/5] COPY ruby/ ./:
+------
+Dockerfile:18
+--------------------
+  16 |
+  17 |     # Copia solo la carpeta del lenguaje elegido
+  18 | >>> COPY ${LENGUAJE}/ ./
+  19 |
+  20 |     RUN if [ "$LENGUAJE" = "java" ]; then \
+--------------------
+ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref owof0h66mnqfk7a4t9dnpk4o3::akvax2pzgwa5y8dqcpc7zecrc: "/ruby": not found
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/priibiz5qaf8zzv6ep130hied
+
+What's next:
+    Debug this build failure with Gordon → docker ai "help me fix this build failure"
+
+3 ¿Qué variable de entorno
+   usan? ¿Qué valores acepta? Defínela en el Dockerfile con un valor
+   por defecto.
+R/
+Nombre: MONEDA_DESTINO, la usan los dos proyectos.
+Valores que acepta: USD, EUR y MXN.
+Valor por defecto: USD, definido en el Dockerfile con ENV MONEDA_DESTINO=USD.
+Si el valor es inválido: el programa muestra Moneda no soportada y termina con código de error.
+
+4R/
+JAVA
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio4> docker run --rm -e MONEDA_DESTINO=USD conversor-java
+CONVERSOR DE MONEDAS (version Java 21.0.8)
+Moneda destino: USD
++----------------------+------------------+--------------+
+| Producto             |       Precio COP |   Precio USD |
++----------------------+------------------+--------------+
+| Portatil             |        2,800,000 |       700.00 |
+| Celular              |        1,150,000 |       287.50 |
+| Audifonos            |          180,000 |        45.00 |
+| Silla ergonomica     |          650,000 |       162.50 |
++----------------------+------------------+--------------+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio4> docker run --rm -e MONEDA_DESTINO=EUR conversor-java
+CONVERSOR DE MONEDAS (version Java 21.0.8)
+Moneda destino: EUR
++----------------------+------------------+--------------+
+| Producto             |       Precio COP |   Precio EUR |
++----------------------+------------------+--------------+
+| Portatil             |        2,800,000 |       636.36 |
+| Celular              |        1,150,000 |       261.36 |
+| Audifonos            |          180,000 |        40.91 |
+| Silla ergonomica     |          650,000 |       147.73 |
++----------------------+------------------+--------------+
+
+
+phyton
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio4> docker run --rm -e MONEDA_DESTINO=USD conversor-python
+CONVERSOR DE MONEDAS (version Python 3.12.13)
+Moneda destino: USD
++------------------+--------------+--------------+
+| Producto         |   Precio COP |   Precio USD |
++==================+==============+==============+
+| Portatil         |    2,800,000 |          700 |
++------------------+--------------+--------------+
+| Celular          |    1,150,000 |        287.5 |
++------------------+--------------+--------------+
+| Audifonos        |      180,000 |           45 |
++------------------+--------------+--------------+
+| Silla ergonomica |      650,000 |        162.5 |
++------------------+--------------+--------------+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio4> docker run --rm -e MONEDA_DESTINO=MXN conversor-python
+CONVERSOR DE MONEDAS (version Python 3.12.13)
+Moneda destino: MXN
++------------------+--------------+--------------+
+| Producto         |   Precio COP |   Precio MXN |
++==================+==============+==============+
+| Portatil         |    2,800,000 |    12,727.27 |
++------------------+--------------+--------------+
+| Celular          |    1,150,000 |     5,227.27 |
++------------------+--------------+--------------+
+| Audifonos        |      180,000 |       818.18 |
++------------------+--------------+--------------+
+| Silla ergonomica |      650,000 |     2,954.55 |
++------------------+--------------+--------------+

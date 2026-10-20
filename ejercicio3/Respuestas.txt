@@ -1,0 +1,45 @@
+¿Qué archivos además del código necesita la aplicación dentro del contenedor?
+R/Necesita un archivo de inventario (.txt), que lee LectorInventario. Por defecto busca datos/inventario.txt, con ruta relativa, así que debe existir en /app/datos/. Por eso el Dockerfile copia la carpeta datos. Para poder mostrar la sede norte sin reconstruir, el archivo de esa sede también debe estar dentro de la imagen.
+
+¿La aplicación usa alguna variable de entorno? ¿Como se llama?
+R/
+Si, ARCHIVO_INVENTARIO y se lee en LectorInventario
+"String archivo = System.getenv().getOrDefault("ARCHIVO_INVENTARIO", "datos/inventario.txt");"
+
+¿Es obligatoria? ¿Para qué sirve?
+R/
+No es obligatoria. Usa getOrDefault, así que si no se define toma el valor por defecto datos/inventario.txt. Sirve para indicar cuál archivo de inventario leer, y así cambiar de sede sin tocar el código ni reconstruir la imagen. Si se define con una ruta que no existe, la app imprime No fue posible leer el inventario: <ruta> y termina con System.exit(1).
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio3> docker build -t inventario-bodega .
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio3> docker run --rm inventario-bodega
+==================================================
+              INVENTARIO DE BODEGA
+==================================================
+Producto                Cantidad        Subtotal
+--------------------------------------------------
+Teclado USB                   25         1125000
+Mouse inalambrico              8          304000  (!)
+Monitor 24 pulgadas           12         8640000
+Cable HDMI                    40          600000
+Memoria USB 64GB               5          160000  (!)
+Diadema con microfono         15         1275000
+--------------------------------------------------
+Valor total del inventario: $12,104,000
+Productos por reponer (!): 2
+==================================================
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio3> docker run --rm -e ARCHIVO_INVENTARIO=datos/inventario_sede_norte.txt inventario-bodega
+==================================================
+              INVENTARIO DE BODEGA
+==================================================
+Producto                Cantidad        Subtotal
+--------------------------------------------------
+Portatil 14 pulgadas           6        16800000  (!)
+Cargador universal            30         1950000
+Base refrigerante              9          495000  (!)
+Webcam HD                     18         2160000
+--------------------------------------------------
+Valor total del inventario: $21,405,000
+Productos por reponer (!): 2
+==================================================

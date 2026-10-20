@@ -1,0 +1,144 @@
+¿Cómo sabe main.py qué perfil ejecutar? ¿Qué debes hacer en el Dockerfile para que lo sepa?
+R/
+Lo lee de la variable de entorno PERFIL, con os.getenv("PERFIL"). Un ARG solo existe durante la construcción y desaparece cuando el contenedor corre. Por eso hay que guardarlo con ENV PERFIL=${PERFIL}, para que quede dentro de la imagen y main.py lo encuentre al ejecutar.
+
+¿Qué otras variables de entorno usa el proyecto? ¿Cuáles son opcionales y qué perfil usa cada una?
+R/
+variable: "PERFIL"
+
+OBLIGATORIA?:SI, Si no se define, main.py imprime que no sabe qué perfil ejecutar y termina con error.
+
+VALOR POR DEFECTO: Ninguno (la define el Dockerfile con ENV)
+
+¿QUIEN LA USA?: main.py, para todos los perfiles
+-----------------------------------------------------------------------------------------
+
+variable: "EVENTO_NOMBRE"
+
+Obligatoria?: No
+
+Valor por defecto: semana de la Ingeniería
+
+¿Quién la usa?: main.py, que se la pasa al módulo de cada perfil: el título en agenda, las letras grandes en banner y el título en inscripción
+-----------------------------------------------------------------------------------------
+
+Variable: URL_INSCRIPCION
+
+obligatoria?: No
+
+valor Por Defecto: https://eam.edu.co
+
+¿Quién la usa?: Solo el perfil inscripcion, para el contenido del código QR
+
+docker build --build-arg PERFIL=agenda -t evento-agenda .
+docker build --build-arg PERFIL=banner -t evento-banner .
+docker build --build-arg PERFIL=inscripcion -t evento-inscripcion .
+
+docker images
+						     DISK USAGE	  CONTENT SIZE
+evento-agenda:latest               d2cb1f6bca21       96.5MB         24.1MB
+evento-banner:latest               a4b6b2468bad        105MB           25MB
+evento-inscripcion:latest          328fd6d61500       97.7MB         24.3MB
+
+MOSTRAMOS LA FUNCIONALIDAD DE LOS COMANDOS
+docker run --rm evento-agenda
+docker run --rm evento-banner
+docker run --rm evento-inscripcion
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio5> docker run --rm evento-agenda
+AGENDA - SEMANA DE LA INGENIERIA
+╭───────────┬──────────┬─────────────────────────────────┬─────────────────────╮
+│ Día       │ Hora     │ Actividad                       │ Lugar               │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Lunes     │ 8:00 AM  │ Inauguración                    │ Auditorio principal │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Lunes     │ 10:00 AM │ Charla: Contenedores en la nube │ Sala 201            │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Martes    │ 2:00 PM  │ Taller de Docker                │ Laboratorio 3       │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Miércoles │ 9:00 AM  │ Hackathon                       │ Bloque C            │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Jueves    │ 4:00 PM  │ Panel de egresados              │ Auditorio principal │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Viernes   │ 11:00 AM │ Premiación                      │ Auditorio principal │
+╰───────────┴──────────┴─────────────────────────────────┴─────────────────────╯
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio5> docker run --rm evento-banner
+   _____                                         __        __
+  / ___/___  ____ ___  ____ _____  ____ _   ____/ /__     / /___ _
+  \__ \/ _ \/ __ `__ \/ __ `/ __ \/ __ `/  / __  / _ \   / / __ `/
+ ___/ /  __/ / / / / / /_/ / / / / /_/ /  / /_/ /  __/  / / /_/ /
+/____/\___/_/ /_/ /_/\__,_/_/ /_/\__,_/   \__,_/\___/  /_/\__,_/
+
+    ____                       _           _
+   /  _/___  ____ ____  ____  (_)__  _____(_)___ _
+   / // __ \/ __ `/ _ \/ __ \/ / _ \/ ___/ / __ `/
+ _/ // / / / /_/ /  __/ / / / /  __/ /  / / /_/ /
+/___/_/ /_/\__, /\___/_/ /_/_/\___/_/  /_/\__,_/
+          /____/
+
+   ¡Te esperamos! Inscripciones abiertas.
+
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio5> docker run --rm evento-inscripcion
+INSCRIPCIONES - Semana de la Ingenieria
+Escanea el código para inscribirte: https://eam.edu.co
+█▀▀▀▀▀▀▀█▀█▀███▀▀▀█▀▀▀▀▀▀▀█
+█ █▀▀▀█ ███ █▄█▀█ █ █▀▀▀█ █
+█ █   █ █ ▄▀▀▄█▀  █ █   █ █
+█ ▀▀▀▀▀ █ ▄ ▄ █▀█▀█ ▀▀▀▀▀ █
+█▀███▀█▀▀ █▄▄█ █▀█▀▀▀▀▀██▀█
+█▄▄ ▄██▀▀▄███▄▄▄ █▀█▀▄ ▀▄██
+██ █▀▄█▀█▀▄▄ █▀ ▄▀▀▀ █▀  ▀█
+█▄██  ▄▀█▄▀▄▀ ▀▀  █▀▀ ▀▀▄██
+█▀▀▀▄██▀█  █▄▀ █▄▀▀▀  ▀ ▄██
+█▀▀▀▀▀▀▀█ ████▄▄█ █▀█ █████
+█ █▀▀▀█ █▀▄ ▀▄▀ █ ▀▀▀   ▄ █
+█ █   █ ██▀ ▀ ▀▀▄▀▀ ▄█▀▄ ▄█
+█ ▀▀▀▀▀ █▀█▀▄▀ █ ██▄▄▄▄  ▀█
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ (QUEDO FEO)
+
+
+VARIABLES OPCIONALES
+docker run --rm -e EVENTO_NOMBRE="Feria Tech" evento-banner
+docker run --rm -e URL_INSCRIPCION=https://ejemplo.com evento-inscripcion
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio5> Docker run --rm -e EVENTO_NOMBRE="Feria Tech" evento-banner
+    ______          _          ______          __
+   / ____/__  _____(_)___ _   /_  __/__  _____/ /_
+  / /_  / _ \/ ___/ / __ `/    / / / _ \/ ___/ __ \
+ / __/ /  __/ /  / / /_/ /    / / /  __/ /__/ / / /
+/_/    \___/_/  /_/\__,_/    /_/  \___/\___/_/ /_/
+
+
+   ¡Te esperamos! Inscripciones abiertas.
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio5> docker run --rm -e URL_INSCRIPCION=https://ejemplo.com evento-inscripcion
+INSCRIPCIONES - Semana de la Ingenieria
+Escanea el código para inscribirte: https://ejemplo.com
+█▀▀▀▀▀▀▀█▀▀█▀▀█▀███▀▀▀▀▀▀▀█
+█ █▀▀▀█ █▀ ▄█▄ ▄█ █ █▀▀▀█ █
+█ █   █ ███▀▄▄▄ ███ █   █ █
+█ ▀▀▀▀▀ █ ▄ █▀█ █▀█ ▀▀▀▀▀ █
+█▀█▀███▀▀█▄▀█▀▀ ▄ ██▀██▀█▀█
+██▄ ▀▄▀▀▄▀█ █▀▄█ █▀▄▄▀ ▀▄ █
+█  ▀▄▀▄▀ ▄▄▄ ▀ █▄ █  █▄██▀█
+█▀▀▄ ▀▀▀▀ █▀█ ▀▀  █ ▄█▀▀▄ █
+█▀▀▄ ██▀▄ ▀ ▄▄▀ █  ▀  ▄█▀██
+█▀▀▀▀▀▀▀█  █▀█▄▄█ █▀█ ███ █
+█ █▀▀▀█ ██▀ ▀▀ █  ▀▀▀ ██  █
+█ █   █ █▀█▀█ ▀▀▀▀ █▀ ▀▄ ▀█
+█ ▀▀▀▀▀ █▀▀▄▄▄▀ ▄ ▄ ▄▄▀██▀█
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀ (quedo feo otra vez)
+
+PARA EL PERFIL INEXISTENTE
+docker build --build-arg PERFIL=musica -t evento-musica .
+(ERROR: el perfil 'musica' no existe. Perfiles disponibles: agenda banner inscripción)
+
+PS C:\Users\acer\Downloads\seguimiento2Docker\ejercicio5> docker run --rm -e PERFIL=banner evento-agenda
+"El perfil 'banner' necesita la librería 'pyfiglet', pero no está instalada en esta imagen."
+
+
+
+
+

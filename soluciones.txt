@@ -1,0 +1,392 @@
+---------------------------------------------------------------------------
+Ejercicio 1.
+---------------------------------------------------------------------------
+1. Dockerfile:
+
+FROM python:3.11-alpine
+WORKDIR /app
+COPY . .
+ENV NOTA_MINIMA=3.0 
+CMD ["python", "app.py"]
+
+2. respuestas:
+
+ -¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+Sí, usa una variable de entorno. Normalmente se llama NOTA_MINIMA (o similar según el código exacto en app.py).
+
+- ¿Es obligatoria? ¿Qué pasa si no se define?
+  No es obligatoria, ya que el código tiene un valor por defecto estructurado (generalmente 3.0). Si no se define, simplemente usa ese valor por defecto para evaluar a los estudiantes.
+
+- ¿Qué cambia en el resultado si se modifica su valor?
+  Cambia la condición (el umbral) con la cual el programa decide y muestra en consola si un estudiante "aprobó" o "reprobó" la materia.
+
+3. comandos:
+
+- Construir la imagen: docker build -t reporte-notas .
+- Ejecución por defecto: docker run reporte-notas
+- Ejecución cambiando la variable: docker run -e NOTA_MINIMA=4.0 reporte-notas
+
+
+---------------------------------------------------------------------------
+Ejercicio 2.
+---------------------------------------------------------------------------
+1. Dockerfile:
+
+FROM node:18-alpine
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install
+COPY . .
+ENV SEDE_CAFETERIA="Sede Principal"
+EXPOSE 3000
+CMD ["node", "src/server.js"]
+
+2. respuestas:
+
+- ¿En qué puerto escucha la aplicación?
+  La aplicación escucha en el puerto 3000.
+
+- ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+  Sí, usa la variable de entorno llamada SEDE_CAFETERIA.
+
+- ¿Es obligatoria? ¿Qué pasa si no se define?
+  No es obligatoria. Si no se define, la aplicación iniciará normalmente y la API devolverá la respuesta con la información por defecto que esté codificada en el archivo (generalmente "Sede Principal" o similar).
+
+3. Comandos:
+
+- Construir la imagen: docker build -t cafe-api .
+- Contenedor Sede 1: docker run -d -p 8080:3000 -e SEDE_CAFETERIA="Sede Principal" --name cafe-central cafe-api
+- Contenedor Sede 2: docker run -d -p 8081:3000 -e SEDE_CAFETERIA="Sede Norte" --name cafe-norte cafe-api
+
+
+---------------------------------------------------------------------------
+Ejercicio 3.
+---------------------------------------------------------------------------
+1. Dockerfile
+
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /app
+COPY src/ ./src/
+COPY datos/ ./datos/
+RUN find src -name "*.java" | xargs javac
+ENV ARCHIVO_INVENTARIO="datos/inventario.txt"
+CMD ["java", "-cp", "src", "bodega.Main"]
+
+2. respuestas:
+
+- ¿Qué archivos además del código necesita la aplicación dentro del contenedor?
+  Necesita los archivos de datos de la carpeta "datos/" (inventario.txt e
+  inventario_sede_norte.txt), porque LectorInventario.java los lee en tiempo de
+  ejecución con Files.readAllLines(). Por eso el Dockerfile hace COPY datos/ ./datos/.
+  Si no estuvieran en la imagen, el programa imprimiría "No fue posible leer el
+  inventario" y terminaría con código 1.
+
+- ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+  Sí, ARCHIVO_INVENTARIO (se lee en LectorInventario con
+  System.getenv().getOrDefault("ARCHIVO_INVENTARIO", "datos/inventario.txt")).
+
+- ¿Es obligatoria? ¿Para qué sirve?
+  No es obligatoria: si no se define, el código usa por defecto "datos/inventario.txt".
+  Sirve para indicar qué archivo de inventario debe leer el programa (ruta relativa a
+  /app), lo que permite cambiar de sede sin recompilar ni reconstruir la imagen.
+
+3. Comandos:
+
+- Construir la imagen:
+  docker build -t bodega-app .
+- Ejecución por defecto (inventario principal):
+  docker run --rm bodega-app
+- Ejecución para la sede norte (sin reconstruir la imagen):
+  docker run --rm -e ARCHIVO_INVENTARIO="datos/inventario_sede_norte.txt" bodega-app
+
+
+---------------------------------------------------------------------------
+Ejercicio 4.
+---------------------------------------------------------------------------
+1. Dockerfile (ejercicio4/Dockerfile)
+
+# ---------- Etapa 1: validar LENGUAJE y separar el proyecto elegido ----------
+FROM alpine:3.20 AS fuente
+ARG LENGUAJE
+COPY . /ctx
+RUN case "$LENGUAJE" in \
+      java|python) ;; \
+      *) echo "ERROR: el argumento LENGUAJE debe ser 'java' o 'python' (valor recibido: '$LENGUAJE')" >&2; exit 1 ;; \
+    esac && \
+    mkdir /proyecto && cp -r "/ctx/$LENGUAJE/." /proyecto/
+
+# ---------- Etapa 2: imagen final ----------
+FROM alpine:3.20
+
+# Argumento de construccion: java | python
+ARG LENGUAJE
+
+# Variable de entorno que usan ambos programas (valores: USD | EUR | MXN)
+ENV MONEDA_DESTINO=USD
+# Se guarda LENGUAJE en el entorno para que CMD sepa que programa arrancar
+ENV LENGUAJE=${LENGUAJE}
+
+# Instalar solo lo necesario para ese lenguaje
+RUN case "$LENGUAJE" in \
+      java)   apk add --no-cache openjdk21-jdk ;; \
+      python) apk add --no-cache python3 ;; \
+      *)      echo "ERROR: el argumento LENGUAJE debe ser 'java' o 'python' (valor recibido: '$LENGUAJE')" >&2; exit 1 ;; \
+    esac
+
+WORKDIR /app
+
+# Copiar unicamente la carpeta del proyecto elegido (java/ o python/)
+COPY --from=fuente /proyecto/ ./
+
+# Preparar el proyecto: compilar (Java) o crear venv e instalar dependencias (Python)
+RUN if [ "$LENGUAJE" = "java" ]; then \
+      mkdir out && /usr/lib/jvm/default-jvm/bin/javac -d out $(find src -name "*.java"); \
+    else \
+      python3 -m venv venv && ./venv/bin/pip install --no-cache-dir -r requirements.txt; \
+    fi
+
+# Ejecutar el programa correcto segun el lenguaje (forma JSON, sin warning)
+CMD ["sh", "-c", "if [ \"$LENGUAJE\" = \"java\" ]; then /usr/lib/jvm/default-jvm/bin/java -cp out conversor.Main; else ./venv/bin/python app.py; fi"]
+
+2. respuestas:
+
+- ¿Qué variable de entorno usan los dos proyectos?
+  MONEDA_DESTINO. En Java se lee en Main.java con System.getenv().getOrDefault(
+  "MONEDA_DESTINO", "USD") y en Python en app.py con os.environ.get("MONEDA_DESTINO", "USD").
+
+- ¿Qué valores acepta?
+  USD, EUR y MXN. Cualquier otro valor (por ejemplo GBP) hace que el programa imprima
+  "Moneda no soportada: ... Use USD, EUR o MXN." y termine con código 1.
+
+- ¿Qué valor por defecto se definió?
+  ENV MONEDA_DESTINO=USD (el mismo que usa el código si la variable no existe).
+
+- ¿Qué pasa si LENGUAJE no es java ni python?
+  La construcción falla en el RUN de la etapa "fuente" (case ... *) con el mensaje:
+  "ERROR: el argumento LENGUAJE debe ser 'java' o 'python' (valor recibido: '...')".
+  Esto también ocurre si no se envía --build-arg LENGUAJE.
+
+- ¿Por qué se usa una etapa previa ("fuente") para validar?
+  Porque BuildKit comprueba en paralelo que exista la carpeta del COPY. Con un
+  valor inválido, COPY ${LENGUAJE}/ fallaba primero con '"/ruby": not found' y
+  cancelaba el RUN de validación, así que el mensaje claro nunca se veía. Con la
+  etapa previa (que copia todo el contexto y valida con case) el mensaje sale
+  siempre, y la imagen final solo recibe la carpeta del proyecto elegido.
+
+- ¿Por qué se hace ENV LENGUAJE=${LENGUAJE}?
+  Porque un ARG solo existe durante el build. El CMD se ejecuta cuando arranca el
+  contenedor, así que necesita LENGUAJE como variable de entorno para decidir
+  qué programa lanzar (ver diapositiva "ARG vs ENV").
+
+3. Comandos:
+
+- Construir la imagen de Java:
+  docker build --build-arg LENGUAJE=java -t conversor-java .
+- Construir la imagen de Python:
+  docker build --build-arg LENGUAJE=python -t conversor-python .
+
+- Prueba de error (valor inválido, la construcción debe fallar):
+  docker build --build-arg LENGUAJE=ruby -t conversor-ruby .
+
+- Ejecutar Java (moneda por defecto, USD):
+  docker run --rm conversor-java
+- Ejecutar Java con otras monedas, sin reconstruir:
+  docker run --rm -e MONEDA_DESTINO=EUR conversor-java
+  docker run --rm -e MONEDA_DESTINO=MXN conversor-java
+
+- Ejecutar Python (moneda por defecto, USD):
+  docker run --rm conversor-python
+- Ejecutar Python con otras monedas, sin reconstruir:
+  docker run --rm -e MONEDA_DESTINO=EUR conversor-python
+  docker run --rm -e MONEDA_DESTINO=MXN conversor-python
+
+
+---------------------------------------------------------------------------
+Ejercicio 5.
+---------------------------------------------------------------------------
+1. Dockerfile (ejercicio5/Dockerfile)
+
+FROM python:3.12-alpine
+
+# Argumento de construccion: agenda | banner | inscripcion
+ARG PERFIL
+
+# main.py lee PERFIL en tiempo de ejecucion, por eso se guarda como ENV
+ENV PERFIL=${PERFIL}
+
+# Variables opcionales (con valor por defecto)
+ENV EVENTO_NOMBRE="Semana de la Ingenieria"
+ENV URL_INSCRIPCION="https://eam.edu.co"
+
+WORKDIR /app
+
+# Se copian los perfiles solo temporalmente para validar e instalar el elegido
+COPY perfiles/ /tmp/perfiles/
+
+# Validar el perfil e instalar unicamente sus librerias; luego borrar lo temporal
+RUN if [ ! -f "/tmp/perfiles/$PERFIL/requirements.txt" ]; then \
+      echo "ERROR: el perfil '$PERFIL' no existe. Use --build-arg PERFIL=agenda|banner|inscripcion" >&2; \
+      exit 1; \
+    fi && \
+    pip install --no-cache-dir -r "/tmp/perfiles/$PERFIL/requirements.txt" && \
+    rm -rf /tmp/perfiles
+
+# Copiar el codigo de la aplicacion
+COPY app/ ./
+
+CMD ["python", "main.py"]
+
+2. respuestas:
+
+- ¿Cómo sabe main.py qué perfil ejecutar? ¿Qué debes hacer en el Dockerfile para que lo sepa?
+  main.py lee la variable de entorno PERFIL con os.getenv("PERFIL"). Como un ARG
+  solo existe durante el build, en el Dockerfile hay que pasarlo a una variable de
+  entorno con ENV PERFIL=${PERFIL}. Si PERFIL no existe, main.py imprime "No se sabe
+  qué perfil ejecutar" y termina con código 1; si el valor no es agenda, banner o
+  inscripcion, imprime "Perfil desconocido".
+
+- ¿Qué otras variables de entorno usa el proyecto? ¿Cuáles son opcionales y qué perfil usa cada una?
+  * EVENTO_NOMBRE: opcional (por defecto "Semana de la Ingenieria"). La usan los
+    tres perfiles (agenda, banner e inscripcion), porque main.py se la pasa a mostrar().
+  * URL_INSCRIPCION: opcional (por defecto "https://eam.edu.co"). Solo la usa el
+    perfil inscripcion, para generar el código QR.
+  * PERFIL: es la única obligatoria.
+
+- Comparación de tamaños (docker images):
+  evento-agenda        -> XX MB   (tabulate)
+  evento-banner        -> XX MB   (pyfiglet + colorama)
+  evento-inscripcion   -> XX MB   (qrcode)
+
+  Las tres imágenes parten de python:3.12-alpine, así que la diferencia depende
+  solo de las librerías de cada perfil. La imagen banner es la más grande porque
+  pyfiglet incluye muchas fuentes. Cada imagen es más liviana que una única
+  imagen con las librerías de los tres perfiles.
+
+- Ejecutar la imagen agenda cambiando PERFIL a banner con -e: ¿qué pasa y por qué?
+  El contenedor arranca y termina con código 1 mostrando:
+  "El perfil 'banner' necesita la librería 'pyfiglet', pero no está instalada en esta imagen."
+  Con -e se sobrescribe la variable de entorno al ejecutar, así que main.py sí
+  intenta cargar salidas.banner. Pero las librerías se instalaron al construir la
+  imagen (build), y la imagen agenda solo tiene tabulate. Cambiar PERFIL en tiempo
+  de ejecución no instala nada: para usar otro perfil hay que construir otra imagen
+  con --build-arg PERFIL=banner.
+
+3. Comandos:
+
+- Construir una imagen por perfil (desde la carpeta ejercicio5/):
+  docker build --build-arg PERFIL=agenda      -t evento-agenda .
+  docker build --build-arg PERFIL=banner      -t evento-banner .
+  docker build --build-arg PERFIL=inscripcion -t evento-inscripcion .
+
+- Prueba de error (perfil inexistente, la construcción debe fallar):
+  docker build --build-arg PERFIL=ruby -t evento-ruby .
+
+- Comparar tamaños:
+  docker images evento-agenda
+  docker images evento-banner
+  docker images evento-inscripcion
+  (o todas juntas: docker images | findstr evento   /   docker images | grep evento)
+
+                                                                                                        i Info →   U  In Use
+IMAGE                  ID             DISK USAGE   CONTENT SIZE   EXTRA
+evento-agenda:latest   7e953bb9ebff        101MB         24.9MB        
+                                                                                                      i Info →   U  In Use
+IMAGE                  ID             DISK USAGE   CONTENT SIZE   EXTRA
+evento-banner:latest   2e520de3b933        110MB         25.7MB        
+                                                                                                      i Info →   U  In Use
+IMAGE                       ID             DISK USAGE   CONTENT SIZE   EXTRA
+evento-inscripcion:latest   3d2c3aec3e1c        103MB         25.1MB        
+
+- Ejecutar cada perfil:
+  docker run --rm evento-agenda
+  docker run --rm evento-banner
+  docker run --rm evento-inscripcion
+ 
+
+  AGENDA - SEMANA DE LA INGENIERIA
+╭───────────┬──────────┬─────────────────────────────────┬─────────────────────╮
+│ Día       │ Hora     │ Actividad                       │ Lugar               │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Lunes     │ 8:00 AM  │ Inauguración                    │ Auditorio principal │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Lunes     │ 10:00 AM │ Charla: Contenedores en la nube │ Sala 201            │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Martes    │ 2:00 PM  │ Taller de Docker                │ Laboratorio 3       │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Miércoles │ 9:00 AM  │ Hackathon                       │ Bloque C            │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Jueves    │ 4:00 PM  │ Panel de egresados              │ Auditorio principal │
+├───────────┼──────────┼─────────────────────────────────┼─────────────────────┤
+│ Viernes   │ 11:00 AM │ Premiación                      │ Auditorio principal │
+╰───────────┴──────────┴─────────────────────────────────┴─────────────────────╯
+   _____                                         __        __     
+  / ___/___  ____ ___  ____ _____  ____ _   ____/ /__     / /___ _
+  \__ \/ _ \/ __ `__ \/ __ `/ __ \/ __ `/  / __  / _ \   / / __ `/
+ ___/ /  __/ / / / / / /_/ / / / / /_/ /  / /_/ /  __/  / / /_/ / 
+/____/\___/_/ /_/ /_/\__,_/_/ /_/\__,_/   \__,_/\___/  /_/\__,_/  
+                                                                  
+    ____                       _           _      
+   /  _/___  ____ ____  ____  (_)__  _____(_)___ _
+   / // __ \/ __ `/ _ \/ __ \/ / _ \/ ___/ / __ `/
+ _/ // / / / /_/ /  __/ / / / /  __/ /  / / /_/ / 
+/___/_/ /_/\__, /\___/_/ /_/_/\___/_/  /_/\__,_/  
+          /____/                                  
+
+   ¡Te esperamos! Inscripciones abiertas.
+INSCRIPCIONES - Semana de la Ingenieria
+Escanea el código para inscribirte: https://eam.edu.co
+█▀▀▀▀▀▀▀█▀█▀███▀▀▀█▀▀▀▀▀▀▀█
+█ █▀▀▀█ ███ █▄█▀█ █ █▀▀▀█ █
+█ █   █ █ ▄▀▀▄█▀  █ █   █ █
+█ ▀▀▀▀▀ █ ▄ ▄ █▀█▀█ ▀▀▀▀▀ █
+█▀███▀█▀▀ █▄▄█ █▀█▀▀▀▀▀██▀█
+█▄▄ ▄██▀▀▄███▄▄▄ █▀█▀▄ ▀▄██
+██ █▀▄█▀█▀▄▄ █▀ ▄▀▀▀ █▀  ▀█
+█▄██  ▄▀█▄▀▄▀ ▀▀  █▀▀ ▀▀▄██
+█▀▀▀▄██▀█  █▄▀ █▄▀▀▀  ▀ ▄██
+█▀▀▀▀▀▀▀█ ████▄▄█ █▀█ █████
+█ █▀▀▀█ █▀▄ ▀▄▀ █ ▀▀▀   ▄ █
+█ █   █ ██▀ ▀ ▀▀▄▀▀ ▄█▀▄ ▄█
+█ ▀▀▀▀▀ █▀█▀▄▀ █ ██▄▄▄▄  ▀█
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+
+- Cambiar las variables opcionales:
+  docker run --rm -e EVENTO_NOMBRE="Feria de Software" evento-banner
+  docker run --rm -e URL_INSCRIPCION="https://ejemplo.com" evento-inscripcion
+
+    ______          _              __   
+   / ____/__  _____(_)___ _   ____/ /__ 
+  / /_  / _ \/ ___/ / __ `/  / __  / _ \
+ / __/ /  __/ /  / / /_/ /  / /_/ /  __/
+/_/    \___/_/  /_/\__,_/   \__,_/\___/ 
+                                        
+   _____       ______                         
+  / ___/____  / __/ /__      ______ _________ 
+  \__ \/ __ \/ /_/ __/ | /| / / __ `/ ___/ _ \
+ ___/ / /_/ / __/ /_ | |/ |/ / /_/ / /  /  __/
+/____/\____/_/  \__/ |__/|__/\__,_/_/   \___/ 
+                                              
+
+   ¡Te esperamos! Inscripciones abiertas.
+INSCRIPCIONES - Semana de la Ingenieria
+Escanea el código para inscribirte: https://ejemplo.com
+█▀▀▀▀▀▀▀█▀▀█▀▀█▀███▀▀▀▀▀▀▀█
+█ █▀▀▀█ █▀ ▄█▄ ▄█ █ █▀▀▀█ █
+█ █   █ ███▀▄▄▄ ███ █   █ █
+█ ▀▀▀▀▀ █ ▄ █▀█ █▀█ ▀▀▀▀▀ █
+█▀█▀███▀▀█▄▀█▀▀ ▄ ██▀██▀█▀█
+██▄ ▀▄▀▀▄▀█ █▀▄█ █▀▄▄▀ ▀▄ █
+█  ▀▄▀▄▀ ▄▄▄ ▀ █▄ █  █▄██▀█
+█▀▀▄ ▀▀▀▀ █▀█ ▀▀  █ ▄█▀▀▄ █
+█▀▀▄ ██▀▄ ▀ ▄▄▀ █  ▀  ▄█▀██
+█▀▀▀▀▀▀▀█  █▀█▄▄█ █▀█ ███ █
+█ █▀▀▀█ ██▀ ▀▀ █  ▀▀▀ ██  █
+█ █   █ █▀█▀█ ▀▀▀▀ █▀ ▀▄ ▀█
+█ ▀▀▀▀▀ █▀▀▄▄▄▀ ▄ ▄ ▄▄▀██▀█
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+- Pregunta 4 (agenda con PERFIL=banner, debe fallar con el mensaje explicado arriba):
+  docker run --rm -e PERFIL=banner evento-agenda
+ 
+ 

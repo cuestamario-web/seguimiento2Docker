@@ -30,4 +30,15 @@ Pistas:
 - En Alpine, pip no deja instalar paquetes en el sistema: usa un
   entorno virtual (python3 -m venv)
 
-Entrega: el Dockerfile y los comandos build/run que utilizaste.
+    Comandos para construir las imágenes:
+docker build --build-arg LENGUAJE=java -t conversor-java .
+
+docker build --build-arg LENGUAJE=python -t conversor-python .
+
+docker run --rm -e MONEDA_DESTINO=USD conversor-java
+
+docker run --rm -e MONEDA_DESTINO=EUR conversor-java
+
+docker run --rm -e MONEDA_DESTINO=USD conversor-python
+
+docker run --rm -e MONEDA_DESTINO=MXN conversor-python

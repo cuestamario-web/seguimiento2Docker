@@ -22,9 +22,10 @@ Tareas:
 3. Revisa el código de ambos proyectos: ¿qué variable de entorno
    usan? ¿Qué valores acepta? Defínela en el Dockerfile con un valor
    por defecto.
+   R= Variable de entorno: MONEDA_DESTINO, Acepto los valores
+   de USD, EUR o MXN y el valor por defecto es de USD.
 4. Construye las dos imágenes y ejecuta cada una con al menos dos
    monedas diferentes sin reconstruir.
-
 Pistas:
 - En Alpine, el JDK queda en /usr/lib/jvm/default-jvm/bin
 - En Alpine, pip no deja instalar paquetes en el sistema: usa un

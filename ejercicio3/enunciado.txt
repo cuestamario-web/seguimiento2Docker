@@ -13,8 +13,12 @@ Tareas:
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿Qué archivos además del código necesita la aplicación dentro
      del contenedor?
+    R/ Los archivos de datos de la carpeta datos/: inventario.txt (el que lee por
+         defecto) e inventario_sede_norte.txt.
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+    R= Sí, ARCHIVO_INVENTARIO
    - ¿Es obligatoria? ¿Para qué sirve?
+    R= No es obligatorio. Si no se define, usa el valor por defecto
 3. Usando la variable de entorno (si existe), ejecuta el contenedor
    para que muestre el inventario de la sede norte, sin reconstruir
    la imagen.

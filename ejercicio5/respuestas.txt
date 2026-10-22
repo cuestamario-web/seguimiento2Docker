@@ -1,0 +1,17 @@
+¿Cómo sabe main.py qué perfil ejecutar? Lee la variable de entorno PERFIL. En el Dockerfile hay que convertir el ARG en variable de entorno con ENV PERFIL=${PERFIL}, porque los ARG solo existen durante la construcción.
+Otras variables: EVENTO_NOMBRE (opcional, por defecto "Semana de la Ingenieria", la usan todos los perfiles) y URL_INSCRIPCION (opcional, por defecto https://eam.edu.co, solo la usa el perfil inscripcion).
+Tamaños de las imágenes: evento-agenda = 21.5MB , evento-banner = 22.5MB , evento-inscripcion = 21.5MB
+Al ejecutar evento-agenda con -e PERFIL=banner: el programa avisa que falta la librería pyfiglet y termina con error. La variable solo elige qué módulo cargar, pero las librerías se instalan al construir la imagen, y esa imagen solo tiene las del perfil agenda.
+
+Comandos utilizados:
+docker build --build-arg PERFIL=agenda -t evento-agenda .
+docker build --build-arg PERFIL=banner -t evento-banner .
+docker build --build-arg PERFIL=inscripcion -t evento-inscripcion .
+docker build --build-arg PERFIL=otro -t evento-error .   (falla con mensaje claro, como se pide)
+docker images --filter "reference=evento-*"
+docker run --rm evento-agenda
+docker run --rm evento-banner
+docker run --rm evento-inscripcion
+docker run --rm -e PERFIL=banner evento-agenda
+docker run --rm -e EVENTO_NOMBRE="Feria de Software" evento-banner
+docker run --rm -e URL_INSCRIPCION=https://ejemplo.com evento-inscripcion

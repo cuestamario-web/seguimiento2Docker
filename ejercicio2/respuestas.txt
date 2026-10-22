@@ -1,0 +1,9 @@
+Puerto: la aplicación escucha en el puerto 3000.
+Variable de entorno: SEDE_CAFETERIA.
+¿Es obligatoria? Sí. Si no se define, la aplicación muestra un error de configuración incompleta y termina (el contenedor se detiene).
+
+Comandos utilizados:
+docker build -t api-cafeteria .
+docker run --rm -p 3000:3000 -e SEDE_CAFETERIA=Centro api-cafeteria
+docker run -d --rm --name cafeteria-norte -p 3001:3000 -e SEDE_CAFETERIA=Norte api-cafeteria
+docker run -d --rm --name cafeteria-sur -p 3002:3000 -e SEDE_CAFETERIA=Sur api-cafeteria

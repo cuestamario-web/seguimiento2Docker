@@ -1,0 +1,3 @@
+Variable de entorno: NOTA_APROBACION
+¿Es obligatoria? No. Si no se define, usa el valor por defecto 3.0.
+¿Qué cambia al modificarla? Cambia la nota mínima para aprobar. Las definitivas no cambian, solo el estado (APROBADO/REPROBADO) y el conteo de aprobados.

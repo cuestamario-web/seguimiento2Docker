@@ -1,0 +1,8 @@
+Archivos adicionales necesarios: los archivos de la carpeta datos/ (inventario.txt por defecto e inventario_sede_norte.txt), porque el código los lee en tiempo de ejecución.
+Variable de entorno: ARCHIVO_INVENTARIO.
+¿Es obligatoria? No. Si no se define, usa datos/inventario.txt. Sirve para elegir qué archivo de inventario lee la aplicación sin reconstruir la imagen.
+
+Comandos utilizados:
+docker build -t inventario-bodega .
+docker run --rm inventario-bodega
+docker run --rm -e ARCHIVO_INVENTARIO=datos/inventario_sede_norte.txt inventario-bodega

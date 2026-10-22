@@ -88,3 +88,94 @@ CMD ["java", "-cp", "src", "bodega.Main"]
 - Construir la imagen: docker build -t bodega-app .
 - Ejecución para la sede norte: docker run -e ARCHIVO_INVENTARIO="datos/inventario_sede_norte.txt" bodega-app
 
+
+------------------------------------------------------------
+Ejercicio 4.
+------------------------------------------------------------
+
+1. Dockerfile
+
+FROM alpine:3.20
+
+ARG LENGUAJE=java
+
+WORKDIR /app
+
+RUN if [ "$LENGUAJE" = "java" ]; then \
+        apk add --no-cache openjdk21-jdk; \
+    elif [ "$LENGUAJE" = "python" ]; then \
+        apk add --no-cache python3; \
+    else \
+        echo "ERROR: Lenguaje no soportado: $LENGUAJE. Use java o python."; \
+        exit 1; \
+    fi
+
+COPY $LENGUAJE/ /app/
+
+RUN if [ "$LENGUAJE" = "java" ]; then \
+       javac src/conversor/*.java; \
+    elif [ "$LENGUAJE" = "python" ]; then \
+       python3 -m venv /app/.venv && \
+       /app/.venv/bin/pip install --no-cache-dir -r requirements.txt;\
+    fi
+
+ENV MONEDA_DESTINO=USD
+ENV LENGUAJE=$LENGUAJE
+ENV PATH="/app/.venv/bin:$PATH"
+
+CMD ["sh", "-c", "if [ \"$LENGUAJE\" = java ]; then exec java -cp out conversor.Main; else exec python3 app.py; fi"]
+
+
+
+2. Respuestas:
+
+- ¿Qué lenguajes de programación permite ejecutar la aplicación?
+Permite ejecutar Java y Python. El lenguaje se selecciona mediante el argumento de construcción LENGUAJE.
+
+- ¿Qué variable de entorno utiliza la aplicación y cómo se llama?
+Utiliza la variable de entorno MONEDA_DESTINO para seleccionar la moneda a la que se desea convertir.
+
+- ¿Qué valores acepta la variable MONEDA_DESTINO?
+Acepta USD (dólar estadounidense), EUR (euro) y MXN (peso mexicano).
+
+- ¿Es obligatoria la variable MONEDA_DESTINO? ¿Para qué sirve?
+No es obligatoria, porque tiene el valor predeterminado USD. Sirve para indicar la moneda de destino de la conversión.
+
+- ¿Qué sucede si se selecciona un lenguaje no soportado?
+La construcción de la imagen falla y muestra un mensaje indicando que solo se permiten los lenguajes java o python.
+
+- ¿Por qué se utiliza un entorno virtual en Python?
+Para instalar las dependencias del proyecto de forma aislada. En este caso, permite instalar la biblioteca tabulate.
+
+- ¿Qué diferencia existe entre ARG y ENV?
+ARG se utiliza durante la construcción de la imagen, mientras que ENV define variables de entorno disponibles durante la ejecución del contenedor.
+
+
+3. Comandos:
+
+- Construir la imagen de Java:
+docker build --build-arg LENGUAJE=java -t conversor-java .
+
+- Construir la imagen de Python:
+docker build --build-arg LENGUAJE=python -t conversor-python .
+
+- Comprobar que un lenguaje no soportado falla:
+docker build --build-arg LENGUAJE=ruby -t conversor-error .
+
+- Ejecutar Java con la moneda predeterminada:
+docker run --rm conversor-java
+
+- Ejecutar Java con euros:
+docker run --rm -e MONEDA_DESTINO=EUR conversor-java
+
+- Ejecutar Java con pesos mexicanos:
+docker run --rm -e MONEDA_DESTINO=MXN conversor-java
+
+- Ejecutar Python con la moneda predeterminada:
+docker run --rm conversor-python
+
+- Ejecutar Python con euros:
+docker run --rm -e MONEDA_DESTINO=EUR conversor-python
+
+- Ejecutar Python con pesos mexicanos:
+docker run --rm -e MONEDA_DESTINO=MXN conversor-python

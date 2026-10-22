@@ -33,3 +33,29 @@ Tareas:
 
 Entrega: el Dockerfile, los comandos build/run que utilizaste y la
 respuesta de las preguntas.
+
+Respuestas:
+
+- main.py lee la variable de entorno PERFIL y, según su valor, importa
+  el modulo correspondiente. El Dockerfile debe definir PERFIL con el
+  mismo valor usado para construir la imagen.
+- EVENTO_NOMBRE es opcional para todos los perfiles. Si no se define,
+  se usa "Semana de la Ingenieria".
+- URL_INSCRIPCION es opcional y solo se usa en el perfil inscripcion.
+  Si no se define, se usa https://eam.edu.co.
+- Al comparar las imagenes localmente, agenda ocupa 87.6 MB,
+  inscripcion 88.8 MB y banner 96 MB.
+- Si se ejecuta la imagen agenda con PERFIL=banner, main.py intenta
+  cargar el modulo banner, pero la imagen solo tiene instaladas las
+  dependencias de agenda. Por eso informa que falta pyfiglet y termina.
+
+Comandos:
+
+docker build --build-arg PERFIL=agenda -t evento-agenda .
+docker build --build-arg PERFIL=banner -t evento-banner .
+docker build --build-arg PERFIL=inscripcion -t evento-inscripcion .
+docker image ls
+docker run --rm evento-agenda
+docker run --rm -e EVENTO_NOMBRE="Semana de prueba" evento-banner
+docker run --rm -e URL_INSCRIPCION="https://eam.edu.co/registro" evento-inscripcion
+docker run --rm -e PERFIL=banner evento-agenda

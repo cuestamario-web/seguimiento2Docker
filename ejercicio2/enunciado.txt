@@ -10,10 +10,20 @@ Tareas:
    aplicación y la ejecute al arrancar el contenedor.
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿En qué puerto escucha la aplicación?
+   La aplicación escucha en el puerto 3000.
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+   Sí, usa la variable de entorno llamada SEDE_CAFETERIA.
    - ¿Es obligatoria? ¿Qué pasa si no se define?
+    Sí, la aplicación la requiere. Si no se define, el servidor muestra un error y termina.
+    El Dockerfile establece "Sede Principal" como valor por defecto.
 3. Ejecuta el contenedor publicando el puerto y verifica en el
    navegador las rutas:  /   /menu   /menu/bebidas
+
+- Construir la imagen: docker build -t cafe-api .
+- Contenedor Sede 1: docker run -d -p 8080:3000 -e SEDE_CAFETERIA="Sede Principal" --name cafe-central cafe-api
+- Contenedor Sede 2: docker run -d -p 8081:3000 -e SEDE_CAFETERIA="Sede Norte" --name cafe-norte cafe-api
+- Verificar rutas: curl.exe http://localhost:8080/ ; curl.exe http://localhost:8080/menu ; curl.exe http://localhost:8080/menu/bebidas
+
 4. Ejecuta dos contenedores al mismo tiempo, cada uno para una sede
    diferente y en un puerto diferente de tu equipo.
 

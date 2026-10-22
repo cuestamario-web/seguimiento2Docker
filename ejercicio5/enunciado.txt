@@ -25,11 +25,35 @@ Tareas:
 2. Revisa el código de app/ (sin ejecutarlo):
    - ¿Cómo sabe main.py qué perfil ejecutar? ¿Qué debes hacer en el
      Dockerfile para que lo sepa?
+     R/ Lo sabe leyendo la variable de entorno PERFIL 
+      En el Dockerfile, se debe usar la instrucción "ENV PERFIL=${PERFIL}" para transferir el valor capturado en 
+      el argumento de construccion  hacia el contenedor.
+   
    - ¿Qué otras variables de entorno usa el proyecto? ¿Cuáles son
      opcionales y qué perfil usa cada una?
+     R/ Usa "EVENTO_NOMBRE" y "URL_INSCRIPCION"  son opcionales gracias a sus valores por defecto. 
+     "EVENTO_NOMBRE" es utilizada por el perfil banner, y "URL_INSCRIPCION" es utilizada por el perfil inscripcion
+
 3. Construye una imagen por cada perfil y compara sus tamaños.
+
 4. Ejecuta la imagen del perfil agenda cambiando PERFIL a banner con
    -e. ¿Qué pasa y por qué?
+    R/ El contenedor falla indicando que la libreria 'pyfiglet' no esta instalada. Esto ocurre porque 
+    la imagen "evento-agenda" se construyó instalando solo las librerías del perfil agenda. 
+    Al forzar la ejecución del perfil "banner" mediante la variable de entorno el codigo intenta importar dependencias 
+    que nunca fueron instaladas en esa imagen especifica
 
 Entrega: el Dockerfile, los comandos build/run que utilizaste y la
 respuesta de las preguntas.
+
+  Comandos utilizados:
+- Build para cada perfil
+  docker build --build-arg PERFIL=agenda -t evento-agenda .
+  docker build --build-arg PERFIL=banner -t evento-banner .
+  docker build --build-arg PERFIL=inscripcion -t evento-inscripcion .
+
+- Verificacion de tamaños:
+  docker images
+
+- Run (Punto 4)
+  docker run --rm -e PERFIL=banner evento-agenda

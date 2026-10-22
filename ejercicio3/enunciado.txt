@@ -13,10 +13,21 @@ Tareas:
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿Qué archivos además del código necesita la aplicación dentro
      del contenedor?
+      R/ Necesita la carpeta "datos" específicamente los archivos de txt que contienen la informacion a procesar 
+      "inventario.txt"  "inventario_sede_norte.txt"
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+      R/Si usa la variable llamada SEDE
    - ¿Es obligatoria? ¿Para qué sirve?
+      R/No es obligatoria para que el programa corra en su versión por defecto
+      pero sirve para indicarle al programa que archivo de inventario específico debe leer 
+      por ejemplo para cargar el inventario de la sede norte en lugar del principal
 3. Usando la variable de entorno (si existe), ejecuta el contenedor
    para que muestre el inventario de la sede norte, sin reconstruir
    la imagen.
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+   comandos usados
+   docker build -t inventario-bodega .
+
+   docker run --rm -e SEDE="norte" inventario-bodega

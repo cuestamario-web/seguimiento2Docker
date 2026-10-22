@@ -9,3 +9,6 @@ En este repositorio encontraran 5 ejercicios cada uno con su respectivo enunciad
 3. Luego de tener los cambios listos debes realizar el push de tu rama usando el parametro -u.
 
 El plazo de entrega y la forma de entregar esta establecido en el Moodle.
+
+READ
+profe cada ejercicio tiene las respuestas en el enunciado.txt de cada uno

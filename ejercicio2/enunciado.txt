@@ -10,11 +10,26 @@ Tareas:
    aplicación y la ejecute al arrancar el contenedor.
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿En qué puerto escucha la aplicación?
+      R/ Escucha en el puerto 3000
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+      R/ Si utiliza la variable llamada SEDE_CAFETERIA
    - ¿Es obligatoria? ¿Qué pasa si no se define?
+      R/Si es obligatoria, si no se define el código muestra el error 
+      "Error: configuración incompleta, la aplicación no puede iniciar." y la aplicación se detiene de inmediato
+      y al arrancar el contenedor no funciona
 3. Ejecuta el contenedor publicando el puerto y verifica en el
    navegador las rutas:  /   /menu   /menu/bebidas
 4. Ejecuta dos contenedores al mismo tiempo, cada uno para una sede
    diferente y en un puerto diferente de tu equipo.
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+   comando build 
+   docker build -t api-cafeteria .
+
+   Run Punto 3 
+  docker run --rm -p 3000:3000 -e SEDE_CAFETERIA="Sede Principal" api-cafeteria
+
+   Run Punto 4 
+  docker run -d -p 3002:3000 -e SEDE_CAFETERIA="Sede Norte" --name cafeteria-norte api-cafeteria
+  docker run -d -p 3003:3000 -e SEDE_CAFETERIA="Sede Sur" --name cafeteria-sur api-cafeteria

@@ -22,6 +22,12 @@ Tareas:
 3. Revisa el código de ambos proyectos: ¿qué variable de entorno
    usan? ¿Qué valores acepta? Defínela en el Dockerfile con un valor
    por defecto.
+
+  R/ Utilizan la variable MONEDA_DESTINO.
+  ¿Qué valores acepta? 
+  Acepta cadigos estandar de monedas extranjeras y tiene USD como valor por defecto
+
+Comandos utilizados:
 4. Construye las dos imágenes y ejecuta cada una con al menos dos
    monedas diferentes sin reconstruir.
 
@@ -31,3 +37,21 @@ Pistas:
   entorno virtual (python3 -m venv)
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+Comandos utilizados:
+- Build (Java):
+  docker build --build-arg LENGUAJE=java -t conversor-java .
+
+- Build (Python):
+  docker build --build-arg LENGUAJE=python -t conversor-python .
+
+- Build (Prueba de error - Punto 2):
+  docker build --build-arg LENGUAJE=c++ -t conversor-error .
+
+- Run Java (Dos monedas distintas):
+  docker run --rm -e MONEDA_DESTINO="EUR" conversor-java
+  docker run --rm -e MONEDA_DESTINO="MXN" conversor-java
+
+- Run Python (Dos monedas distintas):
+  docker run --rm -e MONEDA_DESTINO="USD" conversor-python
+  docker run --rm -e MONEDA_DESTINO="MXN" conversor-python

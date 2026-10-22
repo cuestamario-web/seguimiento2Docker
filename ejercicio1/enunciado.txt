@@ -12,9 +12,19 @@ Tareas:
    al arrancar el contenedor.
 2. Revisa el código (sin ejecutarlo) y responde:
    - ¿La aplicación usa alguna variable de entorno? ¿Cómo se llama?
+     R/ Sí, la variable de entorno se llama NOTA_APROBACION
    - ¿Es obligatoria? ¿Qué pasa si no se define?
+     R/ No es obligatoria. Si no se define, el programa utiliza un valor por defecto de "3.0"
    - ¿Qué cambia en el resultado si se modifica su valor?
+     R/ Altera la condición en la función estado(definitiva). Cambia la nota mínima requerida para que 
+      el estudiante obtenga el estado "APROBADO" en lugar de "REPROBADO".
 3. Si existe, declárala en el Dockerfile con un valor por defecto y
    demuestra con docker run que se puede cambiar sin reconstruir.
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+Comando build
+docker build -t reporte-notas .
+
+comando run 
+docker run --rm reporte-notas

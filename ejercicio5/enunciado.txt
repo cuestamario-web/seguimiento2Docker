@@ -25,11 +25,20 @@ Tareas:
 2. Revisa el código de app/ (sin ejecutarlo):
    - ¿Cómo sabe main.py qué perfil ejecutar? ¿Qué debes hacer en el
      Dockerfile para que lo sepa?
+     R/ Lee la variable de entorno PERFIL con os.getenv("PERFIL").
+     En el DockerFile ARG PERFIL solo existe duranteel build asi que se crea
+     una variable de entorno para que el contenedor pueda arrancar.
+     Si no existe va a imprimir “No se sabe qué perfil ejecutar” y termina con exit(1).
    - ¿Qué otras variables de entorno usa el proyecto? ¿Cuáles son
      opcionales y qué perfil usa cada una?
+     R/EVENTO_NOMBRE es opcional con un valor por defecto “Semana de la Ingenieria”
 3. Construye una imagen por cada perfil y compara sus tamaños.
 4. Ejecuta la imagen del perfil agenda cambiando PERFIL a banner con
    -e. ¿Qué pasa y por qué?
+   Falla con "El perfil en banner necesita la librería 'pyfiglet', pero no está
+     instalada en esta imagen. PERFIL se puede cambiar al ejecutar (ENV), pero las
+     librerías se instalan al construir (docker build) y quedan fijas en la imagen.
+     Para usar banner hay que construir otra imagen con --build-arg PERFIL=banner.
 
 Entrega: el Dockerfile, los comandos build/run que utilizaste y la
 respuesta de las preguntas.

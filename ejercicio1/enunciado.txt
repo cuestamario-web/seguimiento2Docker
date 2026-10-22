@@ -18,3 +18,11 @@ Tareas:
    demuestra con docker run que se puede cambiar sin reconstruir.
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+Comandos utilizados:
+
+docker build -t reporte-notas .
+
+docker run --rm reporte-notas
+
+docker run --rm -e NOTA_APROBACION=3.5 reporte-notas

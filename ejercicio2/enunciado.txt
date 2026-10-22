@@ -18,3 +18,13 @@ Tareas:
    diferente y en un puerto diferente de tu equipo.
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+Comandos utilizados:
+
+docker build -t api-cafeteria .
+
+docker run --rm -p 3000:3000 -e SEDE_CAFETERIA=Centro api-cafeteria
+
+docker run -d --name cafeteria-centro -p 3001:3000 -e SEDE_CAFETERIA=Centro api-cafeteria
+
+docker run -d --name cafeteria-norte  -p 3002:3000 -e SEDE_CAFETERIA=Norte  api-cafeteria

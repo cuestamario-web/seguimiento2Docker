@@ -33,3 +33,26 @@ Tareas:
 
 Entrega: el Dockerfile, los comandos build/run que utilizaste y la
 respuesta de las preguntas.
+
+Comandos utilizados:
+
+docker build --build-arg PERFIL=agenda      -t evento-agenda .
+
+docker build --build-arg PERFIL=banner      -t evento-banner .
+
+docker build --build-arg PERFIL=inscripcion -t evento-inscripcion .
+
+docker build --build-arg PERFIL=musica -t evento-musica .(ERROR)
+
+docker run --rm evento-agenda
+
+docker run --rm evento-banner
+
+docker run --rm evento-inscripcion
+
+docker run --rm -e EVENTO_NOMBRE="Feria de Software" evento-banner
+
+docker run --rm -e URL_INSCRIPCION="https://ejemplo.com/registro" evento-inscripcion
+
+docker run --rm -e PERFIL=banner evento-agenda
+

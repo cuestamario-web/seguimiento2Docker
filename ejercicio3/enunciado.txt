@@ -20,3 +20,11 @@ Tareas:
    la imagen.
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+Comandos utilizados:
+
+docker build -t inventario-bodega .
+
+docker run --rm inventario-bodega
+
+docker run --rm -e ARCHIVO_INVENTARIO=datos/inventario_sede_norte.txt inventario-bodega

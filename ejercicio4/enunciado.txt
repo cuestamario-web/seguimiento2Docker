@@ -31,3 +31,23 @@ Pistas:
   entorno virtual (python3 -m venv)
 
 Entrega: el Dockerfile y los comandos build/run que utilizaste.
+
+Comandos utilizados:
+
+docker build --build-arg LENGUAJE=java   -t conversor-java .
+
+docker build --build-arg LENGUAJE=python -t conversor-python .
+
+docker build --build-arg LENGUAJE=ruby -t conversor-ruby . (FALLLA)
+
+java:
+docker run --rm conversor-java
+docker run --rm -e MONEDA_DESTINO=EUR conversor-java
+docker run --rm -e MONEDA_DESTINO=MXN conversor-java
+
+
+python:
+docker run --rm conversor-python
+docker run --rm -e MONEDA_DESTINO=EUR conversor-python
+docker run --rm -e MONEDA_DESTINO=MXN conversor-python
+docker run --rm -e MONEDA_DESTINO=JPY conversor-python (ERROR)

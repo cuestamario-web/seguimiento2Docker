@@ -1,0 +1,118 @@
+EJERCICIO 4 - Conversor de monedas en dos lenguajes
+Integrantes: Jeronimo Morales - Nicole Davila
+
+1. DOCKERFILE (uno solo para los dos lenguajes)
+
+FROM alpine:3.20
+
+Argumento de construccion: java | python (se pasa con --build-arg)
+ARG LENGUAJE
+
+1. Validar el argumento: si no es java ni python, el build falla
+RUN if [ "$LENGUAJE" != "java" ] && [ "$LENGUAJE" != "python" ]; then \
+        echo "ERROR: LENGUAJE debe ser 'java' o 'python' (se recibio: '$LENGUAJE')"; \
+        exit 1; \
+    fi
+
+2. Instalar lo necesario segun el lenguaje
+RUN if [ "$LENGUAJE" = "java" ]; then \
+        apk add --no-cache openjdk21-jdk; \
+    else \
+        apk add --no-cache python3; \
+    fi
+
+Rutas del JDK y del entorno virtual de Python
+ENV PATH="/usr/lib/jvm/default-jvm/bin:/app/venv/bin:${PATH}"
+
+WORKDIR /app
+
+3. Copiar solo la carpeta del proyecto elegido (java/ o python/)
+COPY ${LENGUAJE}/ ./
+
+4. Preparar el proyecto y crear el script de arranque
+RUN if [ "$LENGUAJE" = "java" ]; then \
+        javac -d out src/conversor/*.java && \
+        echo "exec java -cp /app/out conversor.Main" > /app/iniciar.sh; \
+    else \
+        python3 -m venv venv && \
+        venv/bin/pip install --no-cache-dir -r requirements.txt && \
+        echo "exec python /app/app.py" > /app/iniciar.sh; \
+    fi
+
+5. Variable de entorno con valor por defecto (USD | EUR | MXN)
+ENV MONEDA_DESTINO=USD
+
+6. Al arrancar se ejecuta el programa del lenguaje elegido
+CMD ["sh", "/app/iniciar.sh"]
+
+
+Explicacion:
+- Partimos de alpine:3.20 como pide el enunciado. Alpine es una
+  imagen muy pequena que no trae ni Java ni Python, por eso hay que
+  instalarlos con apk (el gestor de paquetes de Alpine).
+- ARG LENGUAJE recibe el valor con --build-arg al hacer el build.
+  ARG solo existe mientras se construye la imagen, no al ejecutarla.
+- Lo primero que hacemos es validar el argumento. Si no es java ni
+  python el RUN termina con exit 1 y el build se detiene con nuestro
+  mensaje. Lo pusimos antes del COPY porque si no, el COPY fallaria
+  primero con un error confuso de carpeta no encontrada.
+- Segun el lenguaje instalamos openjdk21-jdk o python3.
+- Agregamos al PATH la carpeta del JDK (/usr/lib/jvm/default-jvm/bin)
+  para poder usar javac y java, y la carpeta del entorno virtual de
+  Python (/app/venv/bin).
+- COPY ${LENGUAJE}/ ./ copia solo la carpeta del proyecto elegido:
+  java/ o python/.
+- En Java compilamos con javac. En Python creamos un entorno virtual
+  con python3 -m venv e instalamos tabulate con pip dentro de el,
+  porque en Alpine pip no deja instalar paquetes en el sistema.
+- Como el ARG ya no existe cuando el contenedor arranca, el CMD no
+  puede preguntar por el lenguaje. Por eso en el build escribimos un
+  script iniciar.sh con el comando correcto, y el CMD solo ejecuta
+  ese script.
+
+2. VALOR DISTINTO DE java O python
+
+
+  docker build --build-arg LENGUAJE=ruby -t conversor-ruby .
+
+El build falla con el mensaje:
+  ERROR: LENGUAJE debe ser 'java' o 'python' (se recibio: 'ruby')
+Si no se pasa el --build-arg tambien falla, porque LENGUAJE queda
+vacio.
+
+3. REVISION DEL CODIGO
+
+- ¿Que variable de entorno usan?
+  Los dos proyectos usan MONEDA_DESTINO.
+  Java:   System.getenv().getOrDefault("MONEDA_DESTINO", "USD")
+  Python: os.environ.get("MONEDA_DESTINO", "USD")
+
+- ¿Que valores acepta?
+  USD, EUR o MXN (en mayusculas). Si no se define usa USD. Si se pone
+  otro valor el programa muestra "Moneda no soportada" y termina con
+  codigo 1.
+
+- La definimos en el Dockerfile con ENV MONEDA_DESTINO=USD.
+
+Las tasas son las mismas en los dos lenguajes: 1 USD = 4000 COP,
+1 EUR = 4400 COP y 1 MXN = 220 COP. El programa divide el precio en
+pesos entre la tasa. La diferencia es que Python usa la libreria
+tabulate para dibujar la tabla y Java la arma con printf.
+
+4. CONSTRUIR LAS DOS IMAGENES Y EJECUTAR
+
+Construir (dentro de la carpeta ejercicio4):
+  docker build --build-arg LENGUAJE=java   -t conversor-java .
+  docker build --build-arg LENGUAJE=python -t conversor-python .
+
+Ejecutar la version Java con dos monedas:
+  docker run --rm conversor-java
+  docker run --rm -e MONEDA_DESTINO=EUR conversor-java
+
+Ejecutar la version Python con dos monedas:
+  docker run --rm conversor-python
+  docker run --rm -e MONEDA_DESTINO=MXN conversor-python
+
+Con -e cambiamos la moneda sin reconstruir las imagenes. Las dos
+imagenes salen del mismo Dockerfile, lo unico que cambia es el
+--build-arg.

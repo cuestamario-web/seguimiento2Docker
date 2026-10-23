@@ -1,0 +1,63 @@
+EJERCICIO 3 - Inventario de bodega (Java)
+Integrantes: Jeronimo Morales - Nicole Davila
+
+1. DOCKERFILE
+
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /app
+COPY src ./src
+COPY datos ./datos
+RUN javac -d out src/bodega/*.java
+ENV ARCHIVO_INVENTARIO=datos/inventario.txt
+CMD ["java", "-cp", "out", "bodega.Main"]
+
+Usamos eclipse-temurin:21-jdk-alpine porque trae el JDK, que incluye
+javac para compilar (con solo el JRE no se podria compilar).
+Copiamos la carpeta src con el codigo y la carpeta datos con los
+inventarios, porque la app los lee con ruta relativa desde /app.
+Con RUN javac compilamos durante el build. La opcion -d out guarda
+los .class en la carpeta out respetando el paquete (out/bodega/).
+En el CMD usamos -cp out para indicar donde estan las clases y
+bodega.Main porque Main esta dentro del paquete bodega.
+Pusimos ENV con el mismo valor por defecto que tiene el codigo para
+dejar documentada la variable.
+
+2. REVISION DEL CODIGO
+
+- ¿Que archivos ademas del codigo necesita dentro del contenedor?
+  Los archivos de inventario de la carpeta datos:
+  datos/inventario.txt (el que usa por defecto) y
+  datos/inventario_sede_norte.txt (el de la sede norte).
+  Tienen el formato nombre;cantidad;precio_unitario y las lineas que
+  empiezan con # se ignoran.
+
+- ¿Usa alguna variable de entorno? ¿Como se llama?
+  Si, ARCHIVO_INVENTARIO. Se lee en LectorInventario.java con
+  System.getenv().getOrDefault("ARCHIVO_INVENTARIO", "datos/inventario.txt")
+
+- ¿Es obligatoria? ¿Para que sirve?
+  No es obligatoria, si no se define usa "datos/inventario.txt".
+  Sirve para escoger que archivo de inventario se va a leer, asi con
+  la misma imagen se puede mostrar el inventario de otra sede.
+  Si se pone una ruta que no existe, la app muestra "No fue posible
+  leer el inventario" y termina con System.exit(1).
+
+3. COMANDOS UTILIZADOS
+
+Construir la imagen (dentro de la carpeta ejercicio3):
+  docker build -t inventario-bodega .
+
+Ejecutar con el inventario por defecto:
+  docker run --rm inventario-bodega
+
+Resultado: valor total $12,104,000 y 2 productos por reponer
+(Mouse inalambrico y Memoria USB 64GB).
+
+Ejecutar el inventario de la sede norte sin reconstruir la imagen:
+  docker run --rm -e ARCHIVO_INVENTARIO=datos/inventario_sede_norte.txt inventario-bodega
+
+Resultado: valor total $21,405,000 y 2 productos por reponer
+(Portatil 14 pulgadas y Base refrigerante).
+
+Con -e cambiamos el archivo que lee la app sin hacer build otra vez,
+porque los dos archivos ya estan copiados dentro de la imagen.

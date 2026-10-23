@@ -1,0 +1,123 @@
+EJERCICIO 5 - Un proyecto, varias configuraciones de librerias
+Integrantes: Jeronimo Morales - Nicole Davila
+
+1. DOCKERFILE
+
+FROM python:3.12-alpine
+
+Argumento de construccion: agenda | banner | inscripcion
+ARG PERFIL
+
+WORKDIR /app
+
+1. Copiar los requirements de los perfiles (solo son archivos de texto)
+COPY perfiles ./perfiles
+
+2. Validar el perfil e instalar SOLO sus librerias
+RUN if [ -z "$PERFIL" ] || [ ! -f "perfiles/$PERFIL/requirements.txt" ]; then \
+        echo "ERROR: el perfil '$PERFIL' no existe. Perfiles validos: $(ls perfiles | tr '\n' ' ')"; \
+        exit 1; \
+    fi && \
+    pip install --no-cache-dir -r "perfiles/$PERFIL/requirements.txt" && \
+    rm -rf perfiles
+
+3. Pasar el ARG a una variable de entorno para que main.py la lea al ejecutar
+ENV PERFIL=${PERFIL}
+ENV EVENTO_NOMBRE="Semana de la Ingenieria"
+
+4. Copiar el codigo y ejecutarlo al arrancar
+COPY app/ ./
+CMD ["python", "main.py"]
+
+
+Explicacion:
+- Partimos de python:3.12-alpine como pide el enunciado. Esta imagen
+  ya trae Python y pip, entonces no hay que instalarlos con apk.
+- ARG PERFIL recibe el perfil con --build-arg al construir.
+- Copiamos la carpeta perfiles (son solo los requirements.txt) y con
+  un if revisamos que exista perfiles/$PERFIL/requirements.txt. Si no
+  existe (o no se paso el argumento) mostramos un mensaje con los
+  perfiles validos y hacemos exit 1 para que el build falle.
+- Si el perfil existe, instalamos solo el requirements.txt de ese
+  perfil con pip y despues borramos la carpeta perfiles porque ya no
+  se necesita.
+- ENV PERFIL=${PERFIL} es la parte clave: el ARG solo existe durante
+  el build, pero main.py lee PERFIL cuando el contenedor se ejecuta.
+  Al copiarlo a un ENV queda guardado dentro de la imagen.
+- Copiamos el codigo de app/ al final para que, si cambia el codigo,
+  Docker reutilice la capa de pip que ya esta en cache.
+
+2. REVISION DEL CODIGO
+
+- ¿Como sabe main.py que perfil ejecutar?
+  Lee la variable de entorno PERFIL con os.getenv("PERFIL"). Segun su
+  valor importa el modulo salidas.agenda, salidas.banner o
+  salidas.inscripcion con importlib y llama a su funcion mostrar().
+  PERFIL no tiene valor por defecto: si no existe, el programa
+  muestra "No se sabe que perfil ejecutar: falta configuracion del
+  contenedor." y termina. Si tiene un valor que no esta en la lista
+  muestra "Perfil desconocido".
+
+- ¿Que hay que hacer en el Dockerfile para que lo sepa?
+  Pasar el argumento de construccion a variable de entorno con
+  ENV PERFIL=${PERFIL}. Si solo usaramos ARG, el valor se perderia al
+  terminar el build y main.py no lo encontraria.
+
+- ¿Que otras variables de entorno usa? ¿Cuales son opcionales?
+  EVENTO_NOMBRE: opcional, por defecto "Semana de la Ingenieria". La
+  usan los tres perfiles (titulo de la agenda, texto grande del
+  banner y titulo de la inscripcion).
+  URL_INSCRIPCION: opcional, por defecto "https://eam.edu.co". Solo la
+  usa el perfil inscripcion, es la direccion que se guarda en el QR.
+
+3. UNA IMAGEN POR PERFIL Y COMPARACION DE TAMANOS
+
+Construir (dentro de la carpeta ejercicio5):
+  docker build --build-arg PERFIL=agenda      -t evento-agenda .
+  docker build --build-arg PERFIL=banner      -t evento-banner .
+  docker build --build-arg PERFIL=inscripcion -t evento-inscripcion .
+
+Prueba con un perfil que no existe:
+  docker build --build-arg PERFIL=musica -t evento-musica .
+  -> ERROR: el perfil 'musica' no existe. Perfiles validos: agenda banner inscripcion
+
+Comparar tamanos:
+  docker images evento-*
+
+Resultado: las tres pesan casi lo mismo porque la mayor parte del
+tamano es la imagen base python:3.12-alpine. La diferencia esta en
+las librerias de cada perfil:
+  agenda       -> tabulate                  (la mas liviana, ~0.3 MB)
+  inscripcion  -> qrcode (+ pypng)          (~1 MB)
+  banner       -> pyfiglet + colorama       (la mas pesada, ~8 MB,
+                                             por las fuentes de pyfiglet)
+Por eso conviene que cada imagen lleve solo lo que necesita: si
+instalaramos todo, las tres imagenes cargarian ~9 MB extra sin usarlos.
+
+Ejecutar cada una:
+  docker run --rm evento-agenda
+  docker run --rm evento-banner
+  docker run --rm evento-inscripcion
+  docker run --rm -e EVENTO_NOMBRE="Feria EAM" evento-banner
+  docker run --rm -e URL_INSCRIPCION="https://ejemplo.com/registro" evento-inscripcion
+
+4. IMAGEN AGENDA EJECUTADA CON -e PERFIL=banner
+
+  docker run --rm -e PERFIL=banner evento-agenda
+
+Resultado:
+  El perfil 'banner' necesita la libreria 'pyfiglet', pero no esta
+  instalada en esta imagen.
+
+¿Por que pasa?
+Con -e si cambiamos la variable PERFIL, entonces main.py intenta
+cargar el modulo de banner. Pero las librerias se instalan en el
+build, y la imagen evento-agenda se construyo solo con tabulate. El
+codigo de banner esta dentro de la imagen (copiamos toda la carpeta
+app/), pero pyfiglet y colorama no. Al importar falla con
+ModuleNotFoundError, que main.py atrapa y muestra ese mensaje.
+
+Conclusion: -e sirve para cambiar configuracion en tiempo de
+ejecucion, pero no puede agregar librerias. Para cambiar de perfil
+hay que construir otra imagen con --build-arg.
+

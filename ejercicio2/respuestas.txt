@@ -1,0 +1,78 @@
+EJERCICIO 2 - API de la cafeteria (Node.js)
+Integrantes: Jeronimo Morales - Nicole Davila
+
+
+1. DOCKERFILE
+
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY src ./src
+EXPOSE 3000
+CMD ["node", "src/server.js"]
+
+Usamos la imagen node:20-alpine porque la app es de Node y alpine
+es una version liviana.
+Primero copiamos solo el package.json y hacemos npm install, y
+despues copiamos el codigo (src). Lo hicimos asi porque Docker guarda
+cada paso en cache: si solo cambiamos el codigo, no tiene que volver
+a instalar las dependencias y el build es mas rapido.
+Usamos npm install y no npm ci porque el proyecto no trae
+package-lock.json.
+Pusimos EXPOSE 3000 para documentar el puerto que usa la app.
+No pusimos ENV para SEDE_CAFETERIA porque la app la exige a proposito,
+asi que la pasamos con -e al ejecutar cada contenedor.
+
+Tambien agregamos un archivo .dockerignore con node_modules para que
+no se copie a la imagen la carpeta node_modules del equipo.
+
+2. REVISION DEL CODIGO
+
+
+- ¿En que puerto escucha la aplicacion?
+  En el puerto 3000. Esta fijo en src/config.js (puerto: 3000), no se
+  puede cambiar con variables de entorno.
+
+- ¿Usa alguna variable de entorno? ¿Como se llama?
+  Si, SEDE_CAFETERIA. Se lee en src/config.js con
+  process.env.SEDE_CAFETERIA y se muestra en el mensaje de bienvenida
+  de la ruta /.
+
+- ¿Es obligatoria? ¿Que pasa si no se define?
+  Si es obligatoria, no tiene valor por defecto. Si no se define, la
+  app muestra "Error: configuracion incompleta, la aplicacion no puede
+  iniciar." y termina con process.exit(1), entonces el contenedor se
+  detiene apenas arranca.
+
+3. CONSTRUIR, EJECUTAR Y PROBAR LAS RUTAS
+
+
+Construir la imagen (dentro de la carpeta ejercicio2):
+  docker build -t api-cafeteria .
+
+Prueba sin la variable (para comprobar que es obligatoria):
+  docker run --rm api-cafeteria
+
+Ejecutar publicando el puerto:
+  docker run -d --name cafeteria-centro -p 3000:3000 -e SEDE_CAFETERIA="Sede Centro" api-cafeteria
+
+-d lo deja corriendo en segundo plano y -p 3000:3000 conecta el
+puerto 3000 del equipo con el puerto 3000 del contenedor.
+
+Rutas probadas en el navegador:
+  http://localhost:3000/
+  http://localhost:3000/menu
+  http://localhost:3000/menu/bebidas
+
+4. DOS CONTENEDORES AL MISMO TIEMPO
+
+  docker run -d --name cafeteria-norte -p 3001:3000 -e SEDE_CAFETERIA="Sede Norte" api-cafeteria
+  docker run -d --name cafeteria-sur   -p 3002:3000 -e SEDE_CAFETERIA="Sede Sur"   api-cafeteria
+  docker ps
+
+Los dos contenedores usan el puerto 3000 por dentro, pero cada uno
+esta publicado en un puerto diferente del equipo (3001 y 3002). No
+puede ser el mismo puerto del equipo porque daria error de puerto
+ocupado. La misma imagen sirve para las dos sedes, solo cambia la
+variable de entorno.

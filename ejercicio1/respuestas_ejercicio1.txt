@@ -1,0 +1,54 @@
+EJERCICIO 1 - Reporte de notas (Python)
+
+Nombre: Jeronimo morales, nicole Davíla
+
+1. DOCKERFILE
+
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY app.py evaluacion.py notas.csv ./
+
+ENV NOTA_APROBACION=3.0
+
+CMD ["python", "app.py"]
+
+Usamos la imagen python:3.12-slim porque la app solo usa la libreria
+estandar, entonces no hay que instalar nada con pip.
+Pusimos WORKDIR /app porque el codigo abre "notas.csv" con ruta
+relativa, y si no se define la carpeta de trabajo no lo encuentra.
+Copiamos los tres archivos (incluido el csv porque la app lo necesita).
+No pusimos EXPOSE porque es una app de consola y no usa puertos.
+
+2. REVISION DEL CODIGO
+
+¿Usa alguna variable de entorno? ¿Como se llama?
+  Si, se llama NOTA_APROBACION. Esta en evaluacion.py:
+  MINIMA_PARA_APROBAR = float(os.getenv("NOTA_APROBACION", "3.0"))
+
+¿Es obligatoria? ¿Que pasa si no se define?
+  No es obligatoria. os.getenv tiene un valor por defecto de "3.0",
+  entonces si no se define la app funciona normal y aprueba con 3.0.
+  Si se le pone un valor que no es numero (ej: "tres") el float()
+  da error y la app se cae.
+
+¿Que cambia si se modifica su valor?
+  Cambia la nota minima para aprobar. Las definitivas no cambian
+  (se calculan con 30%, 30% y 40%), solo cambia si cada estudiante
+  queda APROBADO o REPROBADO y el total de aprobados.
+  Con 3.0 aprueban 5 de 7. Con 3.5 aprueban solo 2 de 7
+  (Laura Gomez y Juan Pablo Mejia).
+
+3. COMANDOS UTILIZADOS
+
+Construir la imagen:
+  docker build -t reporte-notas .
+
+Ejecutar con el valor por defecto (3.0):
+  docker run --rm reporte-notas
+
+Ejecutar cambiando la variable sin reconstruir la imagen:
+  docker run --rm -e NOTA_APROBACION=3.5 reporte-notas
+
+
